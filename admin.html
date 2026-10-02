@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JAVI ADMIN Pro 🦊</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body{font-family:Inter,system-ui;background:#0b0e14;color:#fff}
+.card{background:#151b26;border:1px solid rgba(255,255,255,.07);border-radius:1rem}
+input,select{outline:none}
+.navbtn{transition:all.2s}
+#toast{transition:all.3s}
+.stat-card{position:relative;overflow:hidden}
+.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#ff00cc,#7b2ff7)}
+</style>
+</head>
+<body class="min-h-screen">
+<div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 px-6 py-4 rounded-2xl font-bold hidden z-[100] shadow-2xl max-w-[90%] text-center text-sm"></div>
+
+<div id="lock" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-[#0b0e14] to-[#1a1f2e]">
+<div class="card p-8 w-full max-w-sm text-center shadow-2xl">
+<div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 shadow-lg">🦊</div>
+<h1 class="font-black text-2xl mb-1">JAVI ADMIN <span class="text-purple-400">Pro</span></h1>
+<p class="text-xs text-gray-400 mb-6">Panel de control profesional</p>
+<input id="keyInput" type="password" placeholder="🔑 Master Key" class="w-full bg-black/40 p-3.5 rounded-xl mb-3 text-sm border border-white/10 text-center" onkeydown="if(event.key==='Enter')unlock()">
+<button onclick="unlock()" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 py-3.5 rounded-xl font-bold shadow-lg hover:opacity-90 transition">Entrar al Panel</button>
+<p id="lockErr" class="text-red-400 text-xs mt-3"></p>
+</div>
+</div>
+
+<div id="main" class="hidden">
+<header class="p-4 flex justify-between items-center bg-[#12161d]/95 backdrop-blur sticky top-0 z-40 border-b border-white/5 shadow-md">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center text-xl shadow">🦊</div>
+<div><div class="font-black">JAVI ADMIN Pro</div><div class="text-[11px] text-green-400 font-semibold">● Sistema en línea y sincronizado</div></div>
+</div>
+<button onclick="logout()" class="text-xs bg-red-600/20 border border-red-500/30 text-red-300 px-4 py-2 rounded-full font-bold hover:bg-red-600/30 transition">Salir</button>
+</header>
+
+<div class="flex flex-col md:flex-row min-h-screen">
+<nav class="md:w-64 bg-[#12161d] p-3 flex md:flex-col gap-2 overflow-x-auto md:min-h-screen border-r border-white/5">
+<button onclick="tab('dash')" id="b-dash" class="navbtn whitespace-nowrap">📊 Dashboard</button>
+<button onclick="tab('prov')" id="b-prov" class="navbtn whitespace-nowrap">🔌 Proveedores</button>
+<button onclick="tab('serv')" id="b-serv" class="navbtn whitespace-nowrap">📦 Servicios</button>
+<button onclick="tab('users')" id="b-users" class="navbtn whitespace-nowrap">👥 Clientes</button>
+<button onclick="tab('res')" id="b-res" class="navbtn whitespace-nowrap">🤝 Revendedores</button>
+<button onclick="tab('orders')" id="b-orders" class="navbtn whitespace-nowrap">🛒 Órdenes</button>
+<button onclick="tab('set')" id="b-set" class="navbtn whitespace-nowrap">⚙️ Configuración</button>
+</nav>
+
+<main class="flex-1 p-4 md:p-8 max-w-7xl w-full mx-auto">
+
+<!-- DASHBOARD -->
+<div id="t-dash">
+<div class="mb-6"><h2 class="font-black text-2xl tracking-tight">📊 Panel General</h2><p class="text-xs text-gray-400">Resumen de la actividad y estadísticas en tiempo real.</p></div>
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+<div class="card stat-card p-5"><p class="text-[11px] text-gray-400 uppercase font-bold mb-1">Servicios Activos</p><p id="cServ" class="text-3xl font-black text-blue-400">0</p></div>
+<div class="card stat-card p-5"><p class="text-[11px] text-gray-400 uppercase font-bold mb-1">Clientes Totales</p><p id="cUsers" class="text-3xl font-black">0</p></div>
+<div class="card stat-card p-5"><p class="text-[11px] text-gray-400 uppercase font-bold mb-1">Órdenes Totales</p><p id="cOrders" class="text-3xl font-black text-green-400">0</p></div>
+<div class="card stat-card p-5"><p class="text-[11px] text-gray-400 uppercase font-bold mb-1">Revendedores</p><p id="cRes" class="text-3xl font-black text-purple-400">0</p></div>
+</div>
+<div class="card p-6"><h3 class="font-bold text-base mb-4 flex items-center gap-2">💰 Estado de Balance en Proveedores</h3><div id="provBal" class="grid md:grid-cols-2 gap-3 text-sm"></div></div>
+</div>
+
+<!-- PROVEEDORES -->
+<div id="t-prov" class="hidden">
+<div class="mb-6"><h2 class="font-black text-2xl tracking-tight">🔌 Gestión de Proveedores API</h2><p class="text-xs text-gray-400">Conecta y administra tus proveedores de SMM de forma segura.</p></div>
+<div class="card p-6 mb-6">
+<h3 class="font-bold text-sm mb-4 text-purple-400">➕ Agregar Nuevo Proveedor</h3>
+<div class="grid md:grid-cols-2 gap-3 mb-4">
+<input id="p-name" placeholder="Nombre del proveedor (ej. SMMTop)" class="bg-black/40 p-3.5 rounded-xl text-sm border border-white/10">
+<input id="p-priority" type="number" placeholder="Prioridad (1 = Principal)" class="bg-black/40 p-3.5 rounded-xl text-sm border border-white/10">
+<input id="p-url" placeholder="https://proveedor.com/api/v2" class="bg-black/40 p-3.5 rounded-xl text-sm border border-white/10 md:col-span-2">
+<input id="p-key" type="password" placeholder="API Key de acceso" class="bg-black/40 p-3.5 rounded-xl text-sm border border-white/10 md:col-span-2">
+</div>
+<button id="btn-add-prov" onclick="addProv()" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 py-3.5 rounded-xl font-bold text-sm shadow-lg hover:opacity-90 transition">+ Agregar Proveedor API</button>
+</div>
+<div id="provList" class="space-y-3"></div>
+</div>
+
+<!-- SERVICIOS -->
+<div id="t-serv" class="hidden">
+<div class="mb-6"><h2 class="font-black text-2xl tracking-tight">📦 Catálogo Profesional y Control Financiero</h2><p class="text-xs text-gray-400">Edita precios unitarios, categoriza y controla márgenes netos.</p></div>
+<div class="card p-4 mb-4 flex flex-wrap gap-3 items-center justify-between">
+<input id="sSearch" oninput="renderServ()" placeholder="🔍 Buscar por nombre o ID..." class="bg-black/40 p-3.5 rounded-xl text-sm border border-white/10 flex-1 min-w-[200px]">
+<select id="catSelect" onchange="renderServ()" class="bg-black/40 p-3.5 rounded-xl text-sm border border-white/10 text-gray-300 min-w-[200px]">
+<option value="all">📂 Todas las categorías</option>
+</select>
+<div class="flex gap-2 flex-wrap">
+<button onclick="setFilter('all')" id="f-all" class="px-3.5 py-2.5 rounded-xl text-xs font-bold bg-blue-600 text-white transition">Todos</button>
+<button onclick="setFilter('visible')" id="f-visible" class="px-3.5 py-2.5 rounded-xl text-xs font-bold bg-white/5 text-gray-300 hover:bg-white/10 transition">Ver Visibles</button>
+<button onclick="setFilter('hidden')" id="f-hidden" class="px-3.5 py-2.5 rounded-xl text-xs font-bold bg-white/5 text-gray-300 hover:bg-white/10 transition">Ver Ocultos</button>
+<button onclick="massToggle(true)" class="px-3.5 py-2.5 rounded-xl text-xs font-bold bg-green-600/20 text-green-300 border border-green-500/30 hover:bg-green-600/30 transition">Mostrar Todos</button>
+<button onclick="massToggle(false)" class="px-3.5 py-2.5 rounded-xl text-xs font-bold bg-red-600/20 text-red-300 border border-red-500/30 hover:bg-red-600/30 transition">Ocultar Todos</button>
+</div>
+</div>
+<div id="servList" class="space-y-3"></div>
+</div>
+
+<!-- CLIENTES -->
+<div id="t-users" class="hidden">
+<div class="mb-6"><h2 class="font-black text-2xl tracking-tight">👥 Gestión de Clientes</h2><p class="text-xs text-gray-400">Controla saldos, créditos y cuentas de tus usuarios registrados.</p></div>
+<div class="card p-6 mb-6 bg-gradient-to-br from-[#151b26] to-[#1a2332]">
+<h3 class="font-bold text-sm mb-4 text-green-400">💸 Cargar o Retirar Saldo a Cliente</h3>
+<div class="grid md:grid-cols-3 gap-3 mb-3">
+<input id="u-name" list="usersDatalist" placeholder="🔍 Escribe o busca usuario..." class="bg-black/40 p-3.5 rounded-xl text-sm border border-white/10">
+<datalist id="usersDatalist"></datalist>
+<input id="u-amt" type="number" placeholder="Monto en Gs (ej. 50000)" class="bg-black/40 p-3.5 rounded-xl text-sm border border-white/10">
+<div class="flex gap-2">
+<button onclick="addBal(1)" id="btnAddU" class="flex-1 bg-green-600 hover:bg-green-500 py-3.5 rounded-xl font-bold text-sm shadow transition">+ Cargar</button>
+<button onclick="addBal(-1)" id="btnSubU" class="flex-1 bg-red-600 hover:bg-red-500 py-3.5 rounded-xl font-bold text-sm shadow transition">- Retirar</button>
+</div>
+</div>
+<p class="text-[11px] text-gray-400">Selecciona el cliente del autocompletado para aplicar los fondos instantáneamente.</p>
+</div>
+<div id="usersList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+</div>
+
+<!-- REVENDEDORES -->
+<div id="t-res" class="hidden">
+<div class="mb-6"><h2 class="font-black text-2xl tracking-tight">🤝 Red de Revendedores</h2><p class="text-xs text-gray-400">Administra sub-paneles y saldos de tus socios estratégicos.</p></div>
+<div class="grid md:grid-cols-2 gap-6 mb-6">
+<div class="card p-6">
+<h3 class="font-bold text-sm mb-4 text-purple-400">➕ Crear Nuevo Revendedor</h3>
+<div class="space-y-3 mb-4">
+<input id="r-user" placeholder="Nombre de usuario" class="w-full bg-black/40 p-3.5 rounded-xl text-sm border border-white/10">
+<input id="r-pass" type="password" placeholder="Contraseña de acceso" class="w-full bg-black/40 p-3.5 rounded-xl text-sm border border-white/10">
+<input id="r-bal" type="number" placeholder="Saldo inicial en Gs" class="w-full bg-black/40 p-3.5 rounded-xl text-sm border border-white/10">
+</div>
+<button onclick="createRes()" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 py-3.5 rounded-xl font-bold text-sm shadow hover:opacity-90 transition">Crear Cuenta de Revendedor</button>
+</div>
+<div class="card p-6">
+<h3 class="font-bold text-sm mb-4 text-green-400">💸 Ajustar Saldo de Revendedor</h3>
+<div class="space-y-3 mb-4">
+<input id="r-name" list="resDatalist" placeholder="🔍 Buscar revendedor..." class="w-full bg-black/40 p-3.5 rounded-xl text-sm border border-white/10">
+<datalist id="resDatalist"></datalist>
+<input id="r-amt" type="number" placeholder="Monto en Gs" class="w-full bg-black/40 p-3.5 rounded-xl text-sm border border-white/10">
+</div>
+<div class="flex gap-2">
+<button onclick="addResBal(1)" class="flex-1 bg-green-600 hover:bg-green-500 py-3.5 rounded-xl font-bold text-sm shadow transition">+ Cargar Saldo</button>
+<button onclick="addResBal(-1)" class="flex-1 bg-red-600 hover:bg-red-500 py-3.5 rounded-xl font-bold text-sm shadow transition">- Retirar Saldo</button>
+</div>
+</div>
+</div>
+<div id="resList" class="space-y-3"></div>
+</div>
+
+<!-- ORDENES -->
+<div id="t-orders" class="hidden">
+<div class="mb-6"><h2 class="font-black text-2xl tracking-tight">🛒 Historial General de Órdenes</h2><p class="text-xs text-gray-400">Seguimiento detallado de todas las solicitudes enviadas a la plataforma.</p></div>
+<div class="card p-4 mb-4 flex flex-col md:flex-row gap-3 justify-between items-center">
+<input id="oSearch" oninput="renderOrders()" placeholder="🔍 Buscar por usuario, servicio o ID..." class="w-full bg-black/40 p-3.5 rounded-xl text-sm border border-white/10 flex-1">
+<div class="flex gap-2 flex-wrap w-full md:w-auto">
+<button onclick="setOrderFilter('all')" id="fo-all" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-blue-600 text-white transition">Todas</button>
+<button onclick="setOrderFilter('completed')" id="fo-completed" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-white/5 text-gray-300 hover:bg-white/10 transition">Completadas</button>
+<button onclick="setOrderFilter('pending')" id="fo-pending" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-white/5 text-gray-300 hover:bg-white/10 transition">Pendientes</button>
+</div>
+</div>
+<div id="ordersList" class="space-y-3"></div>
+</div>
+
+<!-- CONFIGURACION -->
+<div id="t-set" class="hidden">
+<div class="mb-6"><h2 class="font-black text-2xl tracking-tight">⚙️ Configuración General del Sistema</h2><p class="text-xs text-gray-400">Personaliza los parámetros globales de tu panel y mantenimiento.</p></div>
+<div class="grid md:grid-cols-2 gap-6">
+<div class="card p-6">
+<h3 class="font-bold text-base mb-4 text-blue-400 flex items-center gap-2">📱 Soporte y Anuncios</h3>
+<div class="space-y-4">
+<div>
+<label class="text-xs text-gray-400 font-semibold block mb-1">Número de WhatsApp (con código de país)</label>
+<input id="s-wa" placeholder="595983399906" class="w-full bg-black/40 p-3.5 rounded-xl text-sm border border-white/10">
+</div>
+<div>
+<label class="text-xs text-gray-400 font-semibold block mb-1">Anuncio de la barra superior</label>
+<input id="s-announce" placeholder="🎉 ¡Bienvenidos a JAVI ADMIN Pro!" class="w-full bg-black/40 p-3.5 rounded-xl text-sm border border-white/10">
+</div>
+<button onclick="saveSettings()" class="w-full bg-green-600 hover:bg-green-500 py-3.5 rounded-xl font-bold text-sm shadow transition">💾 Guardar Cambios de Soporte</button>
+</div>
+</div>
+
+<div class="card p-6">
+<h3 class="font-bold text-base mb-4 text-purple-400 flex items-center gap-2">💰 Márgenes y Finanzas</h3>
+<div class="space-y-4">
+<div>
+<label class="text-xs text-gray-400 font-semibold block mb-1">Margen global de ganancia (%)</label>
+<input id="s-margin" type="number" placeholder="30" class="w-full bg-black/40 p-3.5 rounded-xl text-sm border border-white/10">
+</div>
+<div>
+<label class="text-xs text-gray-400 font-semibold block mb-1">Tipo de cambio USD a Guaraníes (₲)</label>
+<input id="s-usd" type="number" placeholder="7500" class="w-full bg-black/40 p-3.5 rounded-xl text-sm border border-white/10">
+</div>
+<button onclick="saveSettings()" class="w-full bg-blue-600 hover:bg-blue-500 py-3.5 rounded-xl font-bold text-sm shadow transition">💾 Guardar Cambios Financieros</button>
+</div>
+</div>
+
+<div class="card p-6 md:col-span-2">
+<h3 class="font-bold text-base mb-4 text-orange-400 flex items-center gap-2">🔧 Herramientas de Mantenimiento y Sincronización</h3>
+<div class="flex gap-3 flex-wrap">
+<button onclick="syncServices()" id="btn-sync" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 px-6 py-3.5 rounded-xl font-bold text-sm shadow transition">🔄 Sincronizar Servicios con APIs</button>
+<button onclick="init()" class="bg-white/10 hover:bg-white/15 px-6 py-3.5 rounded-xl font-bold text-sm transition">↻ Recargar Datos del Servidor</button>
+</div>
+<p class="text-xs text-gray-500 mt-3">La sincronización busca automáticamente nuevos servicios o cambios de tarifas en los proveedores activos.</p>
+</div>
+</div>
+</div>
+
+</main>
+</div>
+</div>
+
+<script>
+const API='https://smmcell-production.up.railway.app/api';
+const MASTER_KEY='JAVI123';
+const H={'Content-Type':'application/json','x-master-key':MASTER_KEY};
+const HA={'x-master-key':MASTER_KEY};
+let allServ=[],allUsers=[],allProv=[],allRes=[],allOrders=[],CURR_SET={},servFilter='all',orderFilter='all';
+
+function showToast(msg, ok=true){
+  const t=document.getElementById('toast');
+  t.innerHTML=msg;
+  t.style.background=ok?'linear-gradient(135deg,#16a34a,#15803d)':'linear-gradient(135deg,#dc2626,#991b1b)';
+  t.classList.remove('hidden');
+  setTimeout(()=>t.classList.add('hidden'),3500);
+}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function unlock(){
+  if(document.getElementById('keyInput').value.trim()===MASTER_KEY){
+    sessionStorage.setItem('javi_auth','1');
+    document.getElementById('lock').style.display='none';
+    document.getElementById('main').classList.remove('hidden');
+    init();
+  }else document.getElementById('lockErr').textContent='❌ Clave de acceso incorrecta';
+}
+function logout(){sessionStorage.removeItem('javi_auth');location.reload();}
+if(sessionStorage.getItem('javi_auth')==='1'){document.getElementById('lock').style.display='none';document.getElementById('main').classList.remove('hidden');setTimeout(init,100);}
+
+function styleNav(active){
+  ['dash','prov','serv','users','res','orders','set'].forEach(t=>{
+    document.getElementById('b-'+t).className='navbtn px-4 py-3.5 rounded-xl text-sm font-medium text-left whitespace-nowrap '+(t===active?'bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold shadow-lg':'text-gray-400 hover:bg-white/5 hover:text-white');
+  });
+}
+function tab(id){
+  ['dash','prov','serv','users','res','orders','set'].forEach(t=>document.getElementById('t-'+t).classList.add('hidden'));
+  document.getElementById('t-'+id).classList.remove('hidden'); styleNav(id);
+}
+styleNav('dash');
+
+async function init(){ 
+  try {
+    await Promise.all([loadProv(),loadServ(),loadUsers(),loadRes(),loadOrders(),loadSettings()]); 
+    showToast('Panel sincronizado con éxito ✅'); 
+  } catch(e) {
+    showToast('⚠️ Error al conectar con el servidor', false);
+  }
+}
+
+async function loadProv(){
+  try{
+    allProv=await fetch(API+'/providers',{headers:HA}).then(r=>r.json());
+    document.getElementById('provList').innerHTML=allProv.map((p,i)=>`
+      <div class="card p-4 flex justify-between items-center">
+        <div><div class="font-bold flex items-center gap-2">${p.active?'🟢':'🔴'} ${esc(p.name)}</div><div class="text-xs text-gray-500 truncate max-w-[280px]">${esc(p.api_url||'')}</div></div>
+        <div class="flex gap-2"><button onclick="toggleProv('${p.id || i}')" class="bg-white/10 hover:bg-white/15 px-3.5 py-2 rounded-xl text-xs font-bold transition">${p.active?'Pausar':'Activar'}</button><button onclick="delProv('${p.id || i}')" class="bg-red-600/20 text-red-300 border border-red-500/30 hover:bg-red-600/30 px-3.5 py-2 rounded-xl text-xs transition">Eliminar</button></div>
+      </div>`).join('');
+    document.getElementById('provBal').innerHTML=allProv.map(p=>`<div class="flex justify-between items-center bg-black/30 p-4 rounded-xl border border-white/5"><span>${p.active?'🟢':'🔴'} ${esc(p.name)}</span><b class="text-green-400 text-base">$${p.balance||'0.00'}</b></div>`).join('');
+  }catch(e){ showToast('❌ Error cargando proveedores', false); }
+}
+
+async function addProv(){
+  const name=document.getElementById('p-name').value.trim(),api_url=document.getElementById('p-url').value.trim(),api_key=document.getElementById('p-key').value.trim(),priority=Number(document.getElementById('p-priority').value)||99;
+  if(!name||!api_url||!api_key) return showToast('❌ Completa todos los campos requeridos',false);
+  const btn = document.getElementById('btn-add-prov');
+  btn.disabled = true; btn.textContent = 'Agregando proveedor...';
+  try {
+    await fetch(API+'/providers',{method:'POST',headers:H,body:JSON.stringify({name,api_url,api_key,priority,active:true})});
+    showToast(`✅ Proveedor <b>${esc(name)}</b> agregado`); loadProv();
+    document.getElementById('p-name').value=''; document.getElementById('p-url').value=''; document.getElementById('p-key').value='';
+  } catch(e) { showToast('❌ Error al agregar proveedor', false); }
+  btn.disabled = false; btn.textContent = '+ Agregar Proveedor API';
+}
+
+async function toggleProv(id){ 
+  try { await fetch(API+'/providers/'+id+'/toggle',{method:'POST',headers:HA}); loadProv(); } catch(e) { showToast('❌ Error', false); }
+}
+
+async function delProv(id){ 
+  if(!confirm('¿Estás seguro de eliminar este proveedor?')) return; 
+  try { await fetch(API+'/providers/'+id,{method:'DELETE',headers:HA}); loadProv(); showToast('✅ Proveedor eliminado'); } catch(e) { showToast('❌ Error', false); }
+}
+
+async function loadServ(){
+  try{ 
+    const j=await fetch(API+'/services-all',{headers:HA}).then(r=>r.json()); 
+    allServ=j.data||[]; 
+    document.getElementById('cServ').textContent=allServ.filter(s=>s.is_visible).length; 
+    
+    const cats = [...new Set(allServ.map(s => s.category || 'General'))].sort();
+    const catSel = document.getElementById('catSelect');
+    catSel.innerHTML = '<option value="all">📂 Todas las categorías</option>' + cats.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+
+    renderServ(); 
+  }catch(e){ showToast('❌ Error cargando servicios', false); }
+}
+
+function setFilter(f){
+  servFilter=f;
+  ['all','visible','hidden'].forEach(ft=>{
+    document.getElementById('f-'+ft).className='px-3.5 py-2.5 rounded-xl text-xs font-bold '+(ft===f?'bg-blue-600 text-white':'bg-white/5 text-gray-300 hover:bg-white/10');
+  });
+  renderServ();
+}
+
+function renderServ(){
+  const q=(document.getElementById('sSearch').value||'').toLowerCase();
+  const selectedCat=document.getElementById('catSelect').value;
+
+  let f=allServ.filter(s=>(s.name||'').toLowerCase().includes(q) || String(s.service).includes(q));
+  if(servFilter==='visible') f=f.filter(s=>s.is_visible);
+  if(servFilter==='hidden') f=f.filter(s=>!s.is_visible);
+  if(selectedCat!=='all') f=f.filter(s=>(s.category||'General')===selectedCat);
+  
+  document.getElementById('servList').innerHTML=f.slice(0,100).map(s=>{
+    const usdRate = Number(CURR_SET.usd_gs || 7500);
+    const origUsd = Number(s.rate || s.original_rate || 0);
+    const costGs = origUsd * usdRate;
+    const currentPriceGs = Number(s.price_gs || 0);
+    const netProfit = currentPriceGs - costGs;
+
+    return `
+      <div class="card p-4 transition hover:border-white/20">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+          <div class="flex items-center gap-2 flex-1 w-full flex-wrap md:flex-nowrap">
+            <span class="text-xs font-bold px-2.5 py-1 rounded-lg bg-black/50 text-purple-400 border border-white/5">ID: ${s.service}</span>
+            <input id="sname-${s.service}" type="text" value="${esc(s.name)}" class="bg-black/40 border border-white/10 p-2.5 rounded-xl text-sm flex-1 min-w-[180px]">
+          </div>
+          <div class="flex items-center gap-2 w-full md:w-auto justify-between flex-wrap">
+            <div class="flex items-center gap-1 bg-green-500/10 px-3 py-1.5 rounded-xl border border-green-500/20">
+              <span class="text-[11px] text-green-300 font-bold">₲</span>
+              <input id="sprice-${s.service}" type="number" value="${currentPriceGs}" class="bg-transparent text-green-400 font-bold text-xs w-24 text-right outline-none">
+            </div>
+            <button onclick="toggleServDetails('${s.service}')" id="btn-det-${s.service}" class="bg-white/10 hover:bg-white/15 px-3.5 py-2 rounded-xl text-xs font-bold transition">📋 Detalles</button>
+            <button onclick="saveServ('${s.service}')" class="bg-blue-600 hover:bg-blue-500 px-3.5 py-2 rounded-xl text-xs font-bold transition shadow">Guardar</button>
+            <button onclick="toggleServ('${s.service}')" class="px-4 py-2 rounded-xl text-xs font-bold transition ${s.is_visible?'bg-green-600 text-white':'bg-red-600 text-white'}">${s.is_visible?'Visible':'Oculto'}</button>
+          </div>
+        </div>
+        <div id="details-${s.service}" class="hidden mt-4 pt-4 border-t border-white/10 grid grid-cols-2 md:grid-cols-4 gap-3 bg-black/30 p-3.5 rounded-xl text-xs">
+          <div><span class="text-gray-500 block">Categoría</span><b class="text-gray-300">${esc(s.category||'General')}</b></div>
+          <div><span class="text-gray-500 block">Proveedor API</span><b class="text-blue-400">${esc(s.provider||'Principal')}</b></div>
+          <div><span class="text-gray-500 block">Tarifa Original (USD)</span><b class="text-yellow-400">$${origUsd.toFixed(2)}</b></div>
+          <div><span class="text-gray-500 block">Margen Neto Estimado</span><b class="${netProfit>=0?'text-green-400':'text-red-400'}">₲${netProfit.toLocaleString(undefined,{maximumFractionDigits:0})}</b></div>
+        </div>
+      </div>`;
+  }).join('')||'<p class="text-gray-500 text-center py-8">No se encontraron servicios</p>';
+}
+
+function toggleServDetails(id){
+  const el = document.getElementById(`details-${id}`);
+  const btn = document.getElementById(`btn-det-${id}`);
+  if(el.classList.contains('hidden')){
+    el.classList.remove('hidden');
+    btn.classList.add('bg-blue-600/30', 'border', 'border-blue-500/40');
+    btn.textContent = 'Ocultar Detalles';
+  } else {
+    el.classList.add('hidden');
+    btn.classList.remove('bg-blue-600/30', 'border', 'border-blue-500/40');
+    btn.textContent = '📋 Detalles';
+  }
+}
+
+async function saveServ(id){
+  const newName=document.getElementById(`sname-${id}`).value.trim();
+  const newPrice=Number(document.getElementById(`sprice-${id}`).value);
+  if(!newName) return showToast('❌ El nombre no puede estar vacío',false);
+  if(isNaN(newPrice) || newPrice < 0) return showToast('❌ Precio inválido',false);
+
+  try{
+    const r=await fetch(API+'/edit-service',{method:'POST',headers:H,body:JSON.stringify({service:id,name:newName,price_gs:newPrice})}).then(r=>r.json());
+    if(r.error) throw new Error(r.error);
+    const s=allServ.find(x=>String(x.service)===String(id));
+    if(s){ s.name=newName; s.price_gs=newPrice; }
+    showToast('✅ <b>Servicio actualizado</b> correctamente');
+    renderServ();
+  }catch(e){ showToast('❌ '+e.message,false); }
+}
+
+async function toggleServ(id){
+  try {
+    await fetch(API+'/toggle-service',{method:'POST',headers:H,body:JSON.stringify({service:id})});
+    const s=allServ.find(x=>String(x.service)===String(id)); if(s) s.is_visible=!s.is_visible;
+    document.getElementById('cServ').textContent=allServ.filter(x=>x.is_visible).length;
+    renderServ(); showToast(s.is_visible?`✅ Servicio <b>activado</b>`:`🔴 Servicio <b>ocultado</b>`);
+  } catch(e) { showToast('❌ Error', false); }
+}
+
+async function massToggle(show){
+  const actionText = show ? 'mostrar' : 'ocultar';
+  if(!confirm(`¿Estás seguro de ${actionText} absolutamente todos los servicios?`)) return;
+  showToast('🔄 Procesando...');
+  try {
+    for(let s of allServ){
+      if(show ? !s.is_visible : s.is_visible){
+        await fetch(API+'/toggle-service',{method:'POST',headers:H,body:JSON.stringify({service:s.service})});
+        s.is_visible = show;
+      }
+    }
+    document.getElementById('cServ').textContent=allServ.filter(x=>x.is_visible).length;
+    renderServ();
+    showToast(`✅ Catálogo actualizado correctamente`);
+  } catch(e) { showToast('❌ Error en acción masiva', false); }
+}
+
+async function loadUsers(){
+  try{
+    allUsers=await fetch(API+'/users',{headers:HA}).then(r=>r.json());
+    document.getElementById('cUsers').textContent=allUsers.length;
+    document.getElementById('usersDatalist').innerHTML=allUsers.map(u=>`<option value="${esc(u.username)}">`).join('');
+    document.getElementById('usersList').innerHTML=allUsers.slice(0,100).map(u=>`<div onclick="document.getElementById('u-name').value='${esc(u.username)}'" class="card p-4 flex justify-between items-center text-sm cursor-pointer hover:border-blue-500 transition"><div><b>👤 ${esc(u.username)}</b></div><span class="text-green-400 font-bold">₲${Number(u.balance||0).toLocaleString()}</span></div>`).join('');
+  }catch(e){ showToast('❌ Error cargando clientes', false); }
+}
+
+async function addBal(sign){
+  const username=document.getElementById('u-name').value.trim().toLowerCase();
+  const amt=Number(document.getElementById('u-amt').value);
+  if(!username) return showToast('❌ Escribe el nombre del usuario',false);
+  if(!amt||amt<=0) return showToast('❌ Monto inválido',false);
+  if(sign < 0 && !confirm(`¿Estás seguro de retirar ₲${amt.toLocaleString()} a @${username}?`)) return;
+
+  const btn=sign>0?document.getElementById('btnAddU'):document.getElementById('btnSubU');
+  btn.disabled=true;
+  try{
+    const r=await fetch(API+'/add-balance',{method:'POST',headers:H,body:JSON.stringify({username,amount:amt*sign})}).then(r=>r.json());
+    if(r.error) throw new Error(r.error);
+    showToast(`✅ Operación exitosa en <b>@${esc(username)}</b><br>Saldo actual: ₲${Number(r.balance||0).toLocaleString()}`);
+    document.getElementById('u-amt').value=''; loadUsers();
+  }catch(e){ showToast('❌ '+e.message,false); }
+  btn.disabled=false;
+}
+
+async function loadRes(){
+  try{
+    allRes=await fetch(API+'/admin/resellers',{headers:HA}).then(r=>r.json());
+    document.getElementById('cRes').textContent=allRes.length;
+    document.getElementById('resDatalist').innerHTML=allRes.map(r=>`<option value="${esc(r.user)}">`).join('');
+    document.getElementById('resList').innerHTML=allRes.map(r=>`<div onclick="document.getElementById('r-name').value='${esc(r.user)}'" class="card p-4 flex justify-between items-center cursor-pointer hover:border-purple-500 transition"><div><b class="text-purple-300">@${esc(r.user)}</b><div class="text-[11px] text-gray-500">${esc(r.note||'Sin notas')}</div></div><b class="text-green-400 text-base">₲${Number(r.balance||0).toLocaleString()}</b></div>`).join('');
+  }catch(e){}
+}
+
+async function createRes(){
+  const user=document.getElementById('r-user').value.trim().toLowerCase(),pass=document.getElementById('r-pass').value,balance=Number(document.getElementById('r-bal').value||0);
+  if(!user||!pass) return showToast('❌ Completa usuario y contraseña',false);
+  try {
+    await fetch(API+'/admin/reseller-create',{method:'POST',headers:H,body:JSON.stringify({user,pass,balance})});
+    showToast(`✅ Revendedor <b>@${esc(user)}</b> creado con éxito`); loadRes();
+    document.getElementById('r-user').value=''; document.getElementById('r-pass').value=''; document.getElementById('r-bal').value='';
+  } catch(e) { showToast('❌ Error al crear revendedor', false); }
+}
+
+async function addResBal(sign){
+  const user=document.getElementById('r-name').value.trim().toLowerCase();
+  const amt=Number(document.getElementById('r-amt').value);
+  if(!user) return showToast('❌ Selecciona el revendedor',false);
+  if(!amt||amt<=0) return showToast('❌ Monto inválido',false);
+  try{
+    const r=await fetch(API+'/admin/reseller-add',{method:'POST',headers:H,body:JSON.stringify({user,amount:amt*sign})}).then(r=>r.json());
+    if(r.error) throw new Error(r.error);
+    showToast(`✅ Saldo actualizado para <b>@${esc(user)}</b><br>Nuevo saldo: ₲${Number(r.balance||0).toLocaleString()}`);
+    document.getElementById('r-amt').value=''; loadRes();
+  }catch(e){ showToast('❌ '+e.message,false); }
+}
+
+async function loadOrders(){
+  try{
+    allOrders=await fetch(API+'/orders',{headers:HA}).then(r=>r.json());
+    document.getElementById('cOrders').textContent=allOrders.length; renderOrders();
+  }catch(e){ showToast('❌ Error cargando órdenes', false); }
+}
+
+function setOrderFilter(f){
+  orderFilter=f;
+  ['all','completed','pending'].forEach(ft=>{
+    document.getElementById('fo-'+ft).className='px-4 py-2.5 rounded-xl text-xs font-bold '+(ft===f?'bg-blue-600 text-white':'bg-white/5 text-gray-300 hover:bg-white/10');
+  });
+  renderOrders();
+}
+
+function renderOrders(){
+  const q=(document.getElementById('oSearch').value||'').toLowerCase();
+  let f=allOrders.filter(o=>(o.username||'').toLowerCase().includes(q)||(o.service||'').toLowerCase().includes(q)||String(o.id).includes(q));
+  if(orderFilter==='completed') f=f.filter(o=>o.status==='completed');
+  if(orderFilter==='pending') f=f.filter(o=>o.status!=='completed');
+
+  document.getElementById('ordersList').innerHTML=f.slice(0,100).map(o=>`<div class="card p-4 flex justify-between items-center"><div class="space-y-1"><b class="text-sm">Orden #${o.id} - ${esc(o.service||'')}</b><div class="text-xs text-gray-400">👤 @${esc(o.username||'')} • Cantidad: ${o.quantity||''} • Total: ₲${Number(o.total_gs||0).toLocaleString()}</div></div><span class="text-xs px-3 py-1.5 rounded-full font-bold ${o.status==='completed'?'bg-green-600/20 text-green-300 border border-green-500/30':'bg-yellow-600/20 text-yellow-300 border border-yellow-500/30'}">${esc(o.status||'pendiente')}</span></div>`).join('')||'<p class="text-gray-500 text-center py-8">No hay órdenes registradas</p>';
+}
+
+async function loadSettings(){
+  try{
+    const s=await fetch(API+'/settings',{headers:HA}).then(r=>r.json()); CURR_SET=s;
+    document.getElementById('s-wa').value=s.whatsapp||'';
+    document.getElementById('s-margin').value=s.margin||'';
+    document.getElementById('s-usd').value=s.usd_gs||'';
+    document.getElementById('s-announce').value=s.announce||'';
+  }catch(e){}
+}
+
+async function saveSettings(){
+  try {
+    const data={...CURR_SET,whatsapp:document.getElementById('s-wa').value.trim(),margin:Number(document.getElementById('s-margin').value)||0,usd_gs:Number(document.getElementById('s-usd').value)||7500,announce:document.getElementById('s-announce').value.trim()};
+    await fetch(API+'/settings',{method:'POST',headers:H,body:JSON.stringify(data)});
+    showToast('✅ <b>Configuración general guardada</b> correctamente'); CURR_SET=data;
+  } catch(e) { showToast('❌ Error al guardar configuración', false); }
+}
+
+async function syncServices(){ 
+  const btn = document.getElementById('btn-sync');
+  btn.textContent = '🔄 Sincronizando APIs...';
+  try {
+    await fetch(API+'/sync-services',{method:'POST',headers:HA}); 
+    await loadServ(); 
+    showToast('✅ <b>Servicios sincronizados</b> con éxito'); 
+  } catch(e) { showToast('❌ Error al sincronizar servicios', false); }
+  btn.textContent = '🔄 Sincronizar Servicios con APIs';
+}
+</script>
+</body>
+</html>

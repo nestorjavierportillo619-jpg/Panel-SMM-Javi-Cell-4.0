@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Panel Revendedor - JAVI</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>body{font-family:Inter,system-ui;background:#0b0e14}input{min-height:48px}.card{background:#151b26;border:1px solid rgba(255,255,255,.07);border-radius:1rem}</style>
+</head>
+<body class="text-white min-h-screen">
+<div id="login" class="min-h-screen flex items-center justify-center p-4">
+<div class="card p-6 w-full max-w-sm"><div class="text-4xl text-center mb-2">🤝</div><h2 class="font-black text-xl text-center mb-4">Panel Revendedor</h2>
+<input id="u" placeholder="Usuario" class="w-full bg-black/40 p-3 rounded-xl text-sm border border-white/10 mb-2">
+<input id="p" type="password" placeholder="Contraseña" class="w-full bg-black/40 p-3 rounded-xl text-sm border border-white/10 mb-3">
+<label class="flex items-center gap-2 text-xs text-gray-400 mb-3"><input id="remember" type="checkbox" checked class="w-4 h-4"> Mantener sesión</label>
+<button onclick="login()" id="btnLogin" class="w-full bg-green-600 py-3 rounded-xl font-bold">Entrar</button>
+<p id="loginErr" class="text-red-400 text-xs mt-2 text-center"></p></div></div>
+<div id="panel" style="display:none" class="p-3 max-w-md mx-auto">
+<div class="card p-4 mb-3 flex justify-between items-center">
+<div><div class="text-xs text-gray-400">Hola</div><div id="uname" class="font-black text-lg"></div><div class="text-xs text-gray-500" id="udate"></div></div>
+<div class="text-right"><div class="text-xs text-gray-400 uppercase font-bold">Saldo</div><div class="text-2xl font-black text-green-400">₲<span id="bal">0</span></div><button onclick="refreshBal()" class="text-xs bg-white/10 px-3 py-1 rounded-full mt-1">🔄 Actualizar</button></div></div>
+<div class="grid grid-cols-3 gap-2 mb-3">
+<div class="card p-3 text-center"><div class="text-[11px] text-gray-400">Hoy</div><div id="stHoy" class="font-black text-green-400">₲0</div></div>
+<div class="card p-3 text-center"><div class="text-[11px] text-gray-400">Cargas</div><div id="stCount" class="font-black">0</div></div>
+<div class="card p-3 text-center"><div class="text-[11px] text-gray-400">Clientes</div><div id="stClients" class="font-black text-blue-400">0</div></div></div>
+<div class="card p-4 mb-3">
+<h3 class="font-bold text-sm mb-3">💸 Cargar saldo a cliente</h3>
+<input id="cli" list="clientsList" placeholder="Usuario cliente (sin @)" class="w-full bg-black/40 p-3 rounded-xl text-sm border border-white/10 mb-2 outline-none">
+<datalist id="clientsList"></datalist>
+<input id="amt" type="number" oninput="checkBalanceLimit()" placeholder="Monto ₲ ej: 50000" class="w-full bg-black/40 p-3 rounded-xl text-sm border border-white/10 mb-1 outline-none">
+<p id="limitWarning" class="text-[11px] text-yellow-400 mb-2 hidden">⚠️ El monto supera tu saldo disponible.</p>
+<div class="grid grid-cols-3 gap-2 mb-3">
+<button onclick="setAmt(20000)" class="bg-white/5 py-2 rounded-lg text-xs">20k</button>
+<button onclick="setAmt(50000)" class="bg-white/5 py-2 rounded-lg text-xs">50k</button>
+<button onclick="setAmt(100000)" class="bg-white/5 py-2 rounded-lg text-xs">100k</button>
+</div>
+<button onclick="cargar()" id="btnCargar" class="w-full bg-green-600 py-3 rounded-xl font-bold">Cargar saldo</button>
+</div>
+<div class="card p-4 mb-3"><div class="flex justify-between items-center mb-2"><h3 class="font-bold text-sm">📜 Movimientos</h3><input id="f-search" oninput="renderMoves()" placeholder="🔍 filtrar" class="bg-black/40 px-3 py-2 rounded-lg text-xs border border-white/10 w-28 outline-none"></div><div id="moves" class="space-y-2 max-h-80 overflow-y-auto text-sm"></div></div>
+<div class="card p-4 mb-3"><h3 class="font-bold text-sm mb-2">🔐 Cambiar contraseña</h3><div class="flex gap-2"><input id="newp" type="password" placeholder="Nueva contraseña" class="flex-1 bg-black/40 p-3 rounded-xl text-sm border border-white/10 outline-none"><button onclick="changePass()" class="bg-yellow-600 px-4 rounded-xl text-sm font-bold">Guardar</button></div></div>
+<button onclick="logout()" class="w-full bg-red-600/20 border border-red-500/30 py-3 rounded-xl font-bold text-sm">Salir</button>
+</div>
+<script>
+const API='https://smmcell-production.up.railway.app/api';
+let RU='',RP='',MOVES=[];
+function setAmt(v){document.getElementById('amt').value=v;checkBalanceLimit();}
+function checkBalanceLimit(){const amount=Number(document.getElementById('amt').value||0);const balNum=Number(document.getElementById('bal').textContent.replace(/\D/g,''))||0;document.getElementById('limitWarning').classList.toggle('hidden',amount<=balNum);}
+async function login(){RU=document.getElementById('u').value.toLowerCase().trim();RP=document.getElementById('p').value;if(!RU||!RP)return err('Completa usuario y contraseña');const btn=document.getElementById('btnLogin');btn.disabled=true;btn.textContent='Entrando...';err('');try{const r=await fetch(API+'/reseller-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user:RU,pass:RP})});const d=await r.json();if(d.error)throw new Error(d.error);if(document.getElementById('remember').checked)localStorage.setItem('res_sess',JSON.stringify({u:RU,p:RP}));showPanel(d);}catch(e){err(e.message);}btn.disabled=false;btn.textContent='Entrar';}
+function err(m){document.getElementById('loginErr').textContent=m}
+function showPanel(d){document.getElementById('login').style.display='none';document.getElementById('panel').style.display='block';document.getElementById('uname').textContent=d.user;document.getElementById('udate').textContent=new Date().toLocaleDateString();document.getElementById('bal').textContent=Number(d.balance).toLocaleString();loadMoves();}
+async function refreshBal(){try{const r=await fetch(API+'/reseller-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user:RU,pass:RP})});const d=await r.json();if(!d.error){document.getElementById('bal').textContent=Number(d.balance).toLocaleString();checkBalanceLimit();}}catch(e){}}
+async function cargar(){const client=document.getElementById('cli').value.trim().toLowerCase().replace('@','');const amount=Number(document.getElementById('amt').value);if(!client)return alert('Pon el usuario cliente');if(!amount||amount<1000)return alert('Monto mínimo ₲1.000');const balNum=Number(document.getElementById('bal').textContent.replace(/\D/g,''));if(amount>balNum)return alert('Saldo insuficiente');if(!confirm(`Cargar ₲${amount.toLocaleString()} a ${client}?`))return;const btn=document.getElementById('btnCargar');btn.disabled=true;btn.textContent='Cargando...';try{const r=await fetch(API+'/reseller-load',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reseller_user:RU,reseller_pass:RP,client_username:client,amount})});const d=await r.json();if(d.error)throw new Error(d.error);alert('✅ Carga exitosa');document.getElementById('bal').textContent=Number(d.new_balance).toLocaleString();document.getElementById('cli').value='';document.getElementById('amt').value='';loadMoves();}catch(e){alert('❌ '+e.message);}btn.disabled=false;btn.textContent='Cargar saldo';}
+async function loadMoves(){try{const r=await fetch(API+'/reseller-moves/'+encodeURIComponent(RU));const d=await r.json();MOVES=Array.isArray(d)?d:[];renderMoves();updateStats();document.getElementById('clientsList').innerHTML=[...new Set(MOVES.map(m=>m.client).filter(Boolean))].map(c=>`<option value="${c}">`).join('');}catch(e){}}
+function renderMoves(){const q=(document.getElementById('f-search').value||'').toLowerCase();const list=MOVES.filter(m=>(m.client||'').toLowerCase().includes(q));document.getElementById('moves').innerHTML=list.slice(0,100).map(m=>`<div class="bg-black/20 p-3 rounded-xl flex justify-between"><div><b class="font-mono text-xs">${m.client}</b><div class="text-[11px] text-gray-500">${(m.date||'').slice(0,10)}</div></div><div class="text-green-400 font-bold">₲${Number(m.amount).toLocaleString()}</div></div>`).join('')||'<p class="text-gray-500 text-xs">Sin movimientos</p>';}
+function updateStats(){const today=new Date().toISOString().slice(0,10);const hoy=MOVES.filter(m=>(m.date||'').slice(0,10)===today).reduce((s,m)=>s+Number(m.amount||0),0);document.getElementById('stHoy').textContent='₲'+hoy.toLocaleString();document.getElementById('stCount').textContent=MOVES.length;document.getElementById('stClients').textContent=new Set(MOVES.map(m=>m.client)).size;}
+async function changePass(){const np=document.getElementById('newp').value.trim();if(np.length<4)return alert('Mínimo 4');try{const r=await fetch(API+'/reseller-change-pass',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user:RU,pass:RP,newPass:np})});const d=await r.json();if(d.error)throw new Error(d.error);RP=np;localStorage.setItem('res_sess',JSON.stringify({u:RU,p:RP}));alert('✅ Cambiada');document.getElementById('newp').value='';}catch(e){alert(e.message)}}
+function logout(){localStorage.removeItem('res_sess');location.reload()}
+(function(){const s=JSON.parse(localStorage.getItem('res_sess')||'null');if(s){document.getElementById('u').value=s.u;document.getElementById('p').value=s.p;login()}})();
+</script></body></html>

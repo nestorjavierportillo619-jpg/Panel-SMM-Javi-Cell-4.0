@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>JaviCell PY 🦊 | Panel SMM Profesional</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config={darkMode:'class',theme:{extend:{colors:{darkBg:'#0b0e14',cardBg:'#151b26'}}}}
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<style>
+body{background:#0b0e14;font-family:Inter,system-ui,sans-serif;color:#f3f4f6}
+.card{background:#151b26;border:1px solid rgba(255,255,255,.07);border-radius:1rem}
+.modal-bg{background:rgba(0,0,0,.82);backdrop-filter:blur(6px)}
+.badge{font-size:10px;padding:3px 8px;border-radius:99px;font-weight:800}
+.skeleton{animation:p 1.2s infinite;background:#1f2735;border-radius:1rem;min-height:130px}
+@keyframes p{0%,100%{opacity:.4}50%{opacity:1}}
+#announce:empty{display:none}
+#toast-container{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;gap:10px;width:90%;max-width:400px}
+.toast{background:#151b26;border:1px solid rgba(255,255,255,.1);padding:12px 16px;border-radius:12px;display:flex;gap:10px;font-size:13px;animation:su.3s ease}
+@keyframes su{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+</style>
+</head>
+<body class="min-h-screen pb-12">
+<div id="toast-container"></div>
+<div id="announce" class="bg-gradient-to-r from-orange-600 to-red-600 text-center text-xs font-bold py-2 px-4"></div>
+<header class="p-4 flex justify-between items-center max-w-6xl mx-auto sticky top-0 bg-[#0b0e14]/95 backdrop-blur z-40 border-b border-white/5">
+<div class="flex items-center gap-2.5 cursor-pointer" onclick="showTab('catalogo')">
+<div class="w-9 h-9 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center text-xl">🦊</div>
+<div class="font-black text-base">JaviCell <span class="text-blue-400">PY</span></div>
+</div>
+<div class="flex gap-2.5 items-center">
+<span id="userBal" class="hidden text-xs bg-green-500/15 text-green-300 border border-green-500/20 px-3 py-1.5 rounded-full font-bold">₲0</span>
+<button id="btnLogin" onclick="openProfile()" class="bg-gradient-to-r from-blue-600 to-purple-600 px-5 py-2 rounded-xl text-sm font-bold">Mi Cuenta</button>
+</div>
+</header>
+<div class="max-w-6xl mx-auto px-4 mt-6">
+<div class="rounded-3xl p-8 text-center bg-gradient-to-br from-blue-900/40 via-[#151b26] to-purple-900/20 border border-white/10">
+<span class="bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[11px] font-extrabold px-3 py-1 rounded-full uppercase mb-3 inline-block">Panel Automatizado Oficial</span>
+<h1 class="text-3xl md:text-4xl font-black mb-3">🦊 Panel SMM #1 en Paraguay</h1>
+<p class="text-gray-300 text-sm mb-6 max-w-lg mx-auto">Servicios sincronizados directamente con el proveedor. Entrega rápida y soporte real.</p>
+<div class="flex justify-center gap-3 flex-wrap">
+<button onclick="document.getElementById('list').scrollIntoView({behavior:'smooth'})" class="bg-gradient-to-r from-blue-600 to-purple-600 px-7 py-3 rounded-xl font-black text-sm">Ver servicios 👇</button>
+<button onclick="openModalFAQ()" class="bg-white/5 border border-white/10 px-6 py-3 rounded-xl font-bold text-sm">❓ Ayuda / FAQ</button>
+</div>
+</div>
+</div>
+<div class="max-w-6xl mx-auto p-4">
+<div class="card p-4 flex flex-col md:flex-row justify-between items-center gap-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-green-500/15 flex items-center justify-center text-green-400 text-xl">💳</div>
+<div>
+<h3 class="font-bold text-sm">¿Cómo recargar saldo?</h3>
+<p class="text-xs text-gray-400 mt-0.5">1. Entrá con Google en <b>Mi Cuenta</b>. 2. Copiá tu usuario. 3. <a id="wa-link" href="#" target="_blank" class="text-green-400 underline font-bold">Pedí recarga por WhatsApp</a></p>
+</div>
+</div>
+</div>
+</div>
+<div class="max-w-6xl mx-auto px-4 flex gap-2 mb-4 overflow-x-auto pb-1">
+<button onclick="showTab('catalogo')" id="tabBtnCat" class="px-5 py-2.5 rounded-xl text-sm font-bold text-white" style="background:linear-gradient(135deg,#ff00cc,#7b2ff7)">📦 Catálogo</button>
+<button onclick="showTab('pedidos')" id="tabBtnPed" class="bg-white/5 border border-white/10 px-5 py-2.5 rounded-xl text-sm">🧾 Mis Pedidos</button>
+</div>
+<section id="tab-catalogo" class="max-w-6xl mx-auto px-4 pb-8">
+<div class="relative mb-3">
+<input id="search" placeholder="🔍 Buscar servicios..." class="w-full bg-[#151b26] p-3.5 pl-11 rounded-xl text-sm border border-white/10 outline-none">
+<span class="absolute left-4 top-3.5 text-gray-400 text-sm">🔍</span>
+</div>
+<div id="platGrid" class="grid grid-cols-4 md:grid-cols-8 gap-2 my-3"></div>
+<div id="loading" class="grid md:grid-cols-2 gap-3 mt-4"><div class="skeleton"></div><div class="skeleton"></div></div>
+<div id="list" class="grid md:grid-cols-2 gap-3"></div>
+<div id="errBox" class="hidden text-center py-12 card p-8 my-4">
+<p class="text-red-400 mb-3">❌ No se pudo cargar. Reintentando...</p>
+<button onclick="init()" class="bg-blue-600 px-6 py-2.5 rounded-xl font-bold text-sm">Reintentar</button>
+</div>
+</section>
+<section id="tab-pedidos" class="max-w-6xl mx-auto px-4 hidden pb-12">
+<div class="flex justify-between items-center mb-4">
+<h2 class="font-black text-lg">🧾 Mis Pedidos</h2>
+<button onclick="renderOrders()" class="text-xs bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg">🔄 Actualizar</button>
+</div>
+<div id="ordersList" class="space-y-3"></div>
+</section>
+<footer class="max-w-6xl mx-auto px-4 border-t border-white/10 pt-8 pb-12 text-xs text-gray-500 text-center">© 2026 JaviCell PY 🦊</footer>
+<div id="profileModal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4" onclick="if(event.target===this)closeProfile()">
+<div class="card p-6 w-full max-w-md rounded-3xl">
+<div class="flex justify-between items-center mb-4"><h3 class="font-black">👤 Mi Cuenta</h3><button onclick="closeProfile()" class="bg-white/10 w-8 h-8 rounded-full">✕</button></div>
+<div id="loginBox"><button onclick="login()" class="w-full bg-white text-black py-3 rounded-xl font-bold text-sm">Continuar con Google</button></div>
+<div id="userBox" class="hidden">
+<div class="bg-black/30 p-4 rounded-2xl mb-4"><p class="text-[11px] text-gray-400 mb-1">Tu usuario:</p><div class="flex gap-2"><code id="myUsername" class="flex-1 bg-black/50 p-2.5 rounded-xl font-mono text-blue-300 text-center font-bold text-sm">-</code><button onclick="copiarUsuario()" class="bg-blue-600 px-4 rounded-xl text-xs font-bold">📋 Copiar</button></div></div>
+<div class="grid grid-cols-2 gap-2 mb-4">
+<div class="bg-green-500/10 border border-green-500/20 p-4 rounded-2xl text-center"><p class="text-[11px] text-gray-400">Saldo</p><p id="myBalance" class="font-black text-green-400 text-xl">₲0</p></div>
+<div class="bg-blue-500/10 border border-blue-500/20 p-4 rounded-2xl text-center"><p class="text-[11px] text-gray-400">Pedidos</p><p id="myOrdersCount" class="font-black text-blue-400 text-xl">0</p></div>
+</div>
+<button id="btnRecharge" class="w-full bg-green-600 py-3 rounded-2xl font-bold text-sm mb-3">💬 Recargar por WhatsApp</button>
+<button onclick="logout()" class="w-full bg-white/5 py-3 rounded-2xl text-xs text-red-400">Cerrar sesión</button>
+</div>
+</div>
+</div>
+<div id="buyModal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4" onclick="if(event.target===this)closeModal()">
+<div class="card p-6 w-full max-w-md rounded-3xl">
+<div class="flex justify-between mb-2"><h3 id="mTitle" class="font-bold text-sm"></h3><button onclick="closeModal()" class="bg-white/10 w-7 h-7 rounded-full text-xs">✕</button></div>
+<div id="mMeta" class="text-xs text-gray-400 mb-4 bg-white/5 p-2 rounded-xl"></div>
+<label class="text-xs font-bold">🔗 Link</label>
+<input id="mLink" placeholder="https://..." class="w-full bg-black/40 p-3 rounded-xl text-sm mb-3 mt-1 border border-white/10">
+<label class="text-xs font-bold">🔢 Cantidad</label>
+<input id="mQty" type="number" class="w-full bg-black/40 p-3 rounded-xl text-sm mb-3 mt-1 border border-white/10">
+<div id="mPrice" class="bg-green-500/10 border border-green-500/20 text-green-400 font-black text-center p-3 rounded-xl mb-4 text-sm">Ingresá cantidad</div>
+<div class="flex gap-2">
+<button onclick="closeModal()" class="flex-1 bg-white/10 py-3 rounded-xl font-bold text-sm">Cancelar</button>
+<button id="btnConfirm" onclick="confirmBuy()" class="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 py-3 rounded-xl font-bold text-sm">Confirmar</button>
+</div>
+<p id="mMsg" class="text-xs text-center mt-3"></p>
+</div>
+</div>
+<div id="faqModal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4" onclick="if(event.target===this)closeModalFAQ()">
+<div class="card p-6 w-full max-w-lg rounded-3xl max-h-[85vh] overflow-y-auto">
+<h3 class="font-black mb-4">❓ Ayuda</h3>
+<div class="text-xs text-gray-300 space-y-3"><div class="bg-white/5 p-3 rounded-xl"><b>Recargas:</b> Copiá tu usuario y envianos comprobante por WhatsApp.</div><div class="bg-white/5 p-3 rounded-xl"><b>Seguridad:</b> No pedimos contraseñas.</div></div>
+<button onclick="closeModalFAQ()" class="w-full bg-blue-600 py-3 rounded-xl font-bold text-sm mt-6">Entendido</button>
+</div>
+</div>
+<a id="wa-float" href="#" target="_blank" class="fixed bottom-5 right-5 w-14 h-14 rounded-full flex items-center justify-center z-40" style="background:#25D366"><img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="w-8 h-8"></a>
+<script>
+const firebaseConfig={apiKey:"AIzaSyALswg4dgodrGIjg7mKgR9gM5iZISg_JqU",authDomain:"javicellpy.firebaseapp.com",projectId:"javicellpy"};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const API='https://smmcell-production.up.railway.app/api';
+const GRAD='linear-gradient(135deg,#ff00cc,#7b2ff7)';
+function showToast(m,t='success'){const c=document.getElementById('toast-container');const d=document.createElement('div');d.className='toast';d.innerHTML=`<span>${t==='success'?'✅':'❌'}</span><span>${esc(m)}</span>`;c.appendChild(d);setTimeout(()=>d.remove(),3500);}
+function setCookie(n,v,d=30){const e=new Date();e.setTime(e.getTime()+d*864e5);document.cookie=`${n}=${encodeURIComponent(v)};expires=${e.toUTCString()};path=/;SameSite=Lax`;}
+function getCookie(n){const m=document.cookie.match(new RegExp('(^| )'+n+'=([^;]+)'));return m?decodeURIComponent(m[2]):null;}
+function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function norm(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
+let servicios=[],currentServ=null,currentUsername=null,WA_NUM='595983399906',currentPlat='all';
+try{const sv=JSON.parse(getCookie('javi_user')||'null');if(sv&&sv.username)currentUsername=sv.username;}catch(e){}
+const ICONS={instagram:"https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg",tiktok:"https://cdn-icons-png.flaticon.com/512/3046/3046121.png",facebook:"https://upload.wikimedia.org/wikipedia/commons/b/b9/2023_Facebook_icon.svg",youtube:"https://upload.wikimedia.org/wikipedia/commons/7/72/YouTube_social_white_square_%282017%29.svg"};
+function getIcon(s){if(!s||!s.name)return null;const n=norm(s.name);for(const k in ICONS){if(n.includes(k))return ICONS[k];}return null;}
+let authReady=false;
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
+auth.onAuthStateChanged(async u=>{if(u){currentUsername=u.email.split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g,'');setCookie('javi_user',JSON.stringify({email:u.email,username:currentUsername}),30);document.getElementById('btnLogin').textContent=(u.displayName||'Mi Cuenta').split(' ')[0];document.getElementById('userBal').classList.remove('hidden');document.getElementById('loginBox').classList.add('hidden');document.getElementById('userBox').classList.remove('hidden');loadMe();}else{if(authReady){currentUsername=null;document.getElementById('btnLogin').textContent='Mi Cuenta';document.getElementById('userBal').classList.add('hidden');document.getElementById('loginBox').classList.remove('hidden');document.getElementById('userBox').classList.add('hidden');}}authReady=true;});
+function login(){const p=new firebase.auth.GoogleAuthProvider();p.setCustomParameters({prompt:'select_account'});auth.signInWithPopup(p).catch(()=>auth.signInWithRedirect(p));}
+function logout(){setCookie('javi_user','',-1);auth.signOut();closeProfile();}
+function openProfile(){document.getElementById('profileModal').classList.remove('hidden');if(currentUsername)document.getElementById('myUsername').textContent=currentUsername;}
+function closeProfile(){document.getElementById('profileModal').classList.add('hidden');}
+function openModalFAQ(){document.getElementById('faqModal').classList.remove('hidden');}
+function closeModalFAQ(){document.getElementById('faqModal').classList.add('hidden');}
+function copiarUsuario(){if(currentUsername){navigator.clipboard.writeText(currentUsername);showToast('¡Usuario copiado!');}}
+function showTab(t){document.getElementById('tab-catalogo').classList.toggle('hidden',t!=='catalogo');document.getElementById('tab-pedidos').classList.toggle('hidden',t!=='pedidos');if(t!=='catalogo')renderOrders();}
+async function init(){
+document.getElementById('loading').classList.remove('hidden');document.getElementById('errBox').classList.add('hidden');
+try{const sp=await fetch(API+'/settings').then(r=>r.json());if(sp.whatsapp)WA_NUM=sp.whatsapp;if(sp.announce)document.getElementById('announce').textContent=sp.announce;}catch(e){}
+document.getElementById('wa-float').href='https://wa.me/'+WA_NUM;document.getElementById('wa-link').href='https://wa.me/'+WA_NUM;
+document.getElementById('btnRecharge').onclick=()=>window.open('https://wa.me/'+WA_NUM+'?text='+encodeURIComponent('Hola, quiero recargar. Mi usuario: '+(currentUsername||'')));
+try{const r=await fetch(API+'/services');if(!r.ok)throw 0;const j=await r.json();servicios=j.data||[];document.getElementById('loading').classList.add('hidden');render(servicios);renderPlats();}catch(e){document.getElementById('loading').classList.add('hidden');document.getElementById('errBox').classList.remove('hidden');}
+}
+function renderPlats(){const ids=['instagram','tiktok','facebook','youtube'];document.getElementById('platGrid').innerHTML=`<div onclick="setPlat('all')" class="card p-2.5 text-center cursor-pointer" style="${currentPlat==='all'?`background:${GRAD};color:white`:''}"><div class="text-xl">🌐</div><p class="text-[11px] font-bold">Todos</p></div>`+ids.map(id=>`<div onclick="setPlat('${id}')" class="card p-2.5 text-center cursor-pointer" style="${currentPlat===id?`background:${GRAD};color:white`:''}"><img src="${ICONS[id]}" class="w-7 h-7 mx-auto bg-white rounded p-1"><p class="text-[11px] font-bold capitalize mt-1">${id}</p></div>`).join('');}
+function setPlat(id){currentPlat=id;renderPlats();filtrar();}
+function render(l){document.getElementById('list').innerHTML=l.map(s=>{const pgs=s.price_gs?'₲'+Number(s.price_gs).toLocaleString()+'/1k':'';const ic=getIcon(s);return `<div class="card p-4 flex flex-col justify-between"><div><div class="flex gap-3 mb-2.5">${ic?`<img loading="lazy" src="${ic}" class="w-11 h-11 bg-white rounded-xl p-1.5 object-contain">`:''}<div class="flex-1"><h3 class="font-bold text-xs md:text-sm">${esc(s.name)}</h3><div class="flex gap-1.5 mt-2"><span class="badge bg-green-500/15 text-green-300">🟢 Activo</span><span class="badge bg-white/5 text-gray-300">${pgs}</span></div></div></div><p class="text-[11px] text-gray-400 mb-4 bg-black/20 p-2 rounded-xl">Mín: ${s.min} • Máx: ${Number(s.max).toLocaleString()}</p></div><div class="flex justify-between items-center pt-2 border-t border-white/5"><span class="text-[11px] text-gray-400">Automático</span><button onclick="openBuy('${s.service}')" class="px-5 py-2 rounded-xl text-xs font-bold text-white" style="background:${GRAD}">Comprar</button></div></div>`;}).join('')||'<p class="text-center py-12 text-gray-500 col-span-2">Sin servicios</p>';}
+let deb;document.getElementById('search').addEventListener('input',()=>{clearTimeout(deb);deb=setTimeout(filtrar,300);});
+function filtrar(){const q=norm(document.getElementById('search').value);let list=servicios.filter(s=>norm(s.name).includes(q));if(currentPlat!=='all')list=list.filter(s=>norm(s.name).includes(currentPlat));render(list);}
+function openBuy(id){if(!currentUsername){openProfile();showToast('Inicia sesión para comprar','error');return;}currentServ=servicios.find(x=>String(x.service)===String(id));if(!currentServ)return;document.getElementById('mTitle').textContent=currentServ.name;document.getElementById('mMeta').innerHTML=`Min ${currentServ.min} - Max ${Number(currentServ.max).toLocaleString()}`;document.getElementById('mQty').value='';document.getElementById('mLink').value='';document.getElementById('mPrice').textContent='Ingresá cantidad';document.getElementById('buyModal').classList.remove('hidden');}
+function closeModal(){document.getElementById('buyModal').classList.add('hidden');}
+document.getElementById('mQty').addEventListener('input',()=>{if(!currentServ)return;const q=Number(document.getElementById('mQty').value||0);if(!q){document.getElementById('mPrice').textContent='Ingresá cantidad';return;}const total=Math.round(Number(currentServ.price_gs)/1000*q);document.getElementById('mPrice').textContent='Total: ₲'+total.toLocaleString();});
+async function confirmBuy(){const link=document.getElementById('mLink').value.trim();const qty=Number(document.getElementById('mQty').value);if(!link.startsWith('http')){showToast('Link inválido','error');return;}if(qty<currentServ.min||qty>currentServ.max){showToast('Cantidad inválida','error');return;}const btn=document.getElementById('btnConfirm');btn.disabled=true;btn.textContent='Procesando...';try{const r=await fetch(API+'/order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({service:currentServ.service,link,quantity:qty,username:currentUsername})});const d=await r.json();if(!r.ok)throw new Error(d.error||'Error');showToast('¡Pedido creado!');let my=[];try{my=JSON.parse(localStorage.getItem('my_orders')||'[]');}catch(e){}my.unshift({id:d.order?.id||Date.now(),service:currentServ.name,link,quantity:qty,total:d.order?.total_gs||0,date:new Date().toLocaleDateString()});localStorage.setItem('my_orders',JSON.stringify(my.slice(0,50)));loadMe();setTimeout(()=>{closeModal();showTab('pedidos');},800);}catch(e){showToast(e.message,'error');}btn.disabled=false;btn.textContent='Confirmar';}
+async function loadMe(){if(!currentUsername)return;try{const me=await fetch(API+'/me',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:currentUsername})}).then(r=>r.json());const b='₲'+Number(me.balance||0).toLocaleString();document.getElementById('userBal').textContent=b;document.getElementById('myBalance').textContent=b;}catch(e){}}
+function renderOrders(){let my=[];try{my=JSON.parse(localStorage.getItem('my_orders')||'[]');}catch(e){}document.getElementById('ordersList').innerHTML=my.map(x=>`<div class="card p-4"><b class="text-sm">#${x.id} ${esc(x.service)}</b><p class="text-xs text-gray-400 truncate">🔗 ${esc(x.link)}</p><p class="text-xs mt-1">₲${Number(x.total||0).toLocaleString()} • ${x.quantity} • ${x.date||''}</p></div>`).join('')||'<div class="card p-8 text-center text-gray-500">Sin pedidos</div>';document.getElementById('myOrdersCount').textContent=my.length;}
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Admin Revendedores 🦊 v2</title><script src="https://cdn.tailwindcss.com"></script>
+<style>body{background:#0b0e14;font-family:Inter,system-ui}.card{background:#151b26;border:1px solid rgba(255,255,255,.07);border-radius:1rem}input{min-height:44px}</style>
+</head><body class="text-white min-h-screen">
+<div id="lock" class="min-h-screen flex items-center justify-center p-4">
+<div class="card p-8 w-full max-w-sm text-center">
+<div class="w-14 h-14 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4">🦊</div>
+<h1 class="font-black text-lg mb-1">Admin Revendedores v2</h1><p class="text-xs text-gray-400 mb-6">Acceso restringido</p>
+<input id="key" type="password" placeholder="Clave maestra" class="w-full bg-black/40 p-3.5 rounded-xl mb-3 text-sm border border-white/10">
+<button onclick="unlock()" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 py-3.5 rounded-xl font-bold">Entrar</button>
+</div></div>
+<div id="main" class="hidden max-w-4xl mx-auto p-4 pb-12">
+<div class="flex justify-between items-center py-4"><h1 class="font-black text-xl">👥 Revendedores</h1><span class="text-xs bg-white/10 px-3 py-1 rounded-full" id="totalR">0</span></div>
+<div class="grid grid-cols-3 gap-2 mb-4">
+<div class="card p-3 text-center"><div class="text-[11px] text-gray-400">Total saldo</div><div id="statTotal" class="font-black text-green-400">₲0</div></div>
+<div class="card p-3 text-center"><div class="text-[11px] text-gray-400">Activos</div><div id="statActive" class="font-black">0</div></div>
+<div class="card p-3 text-center"><div class="text-[11px] text-gray-400">Pausados</div><div id="statPaused" class="font-black text-yellow-400">0</div></div></div>
+<div class="card p-6 mb-4"><h3 class="font-bold mb-4">➕ Crear nuevo</h3>
+<div class="grid md:grid-cols-2 gap-2">
+<input id="nUser" placeholder="usuario (ej: juan_py)" class="bg-black/40 p-3 rounded-xl text-sm border border-white/10 font-mono">
+<input id="nPass" placeholder="contraseña" class="bg-black/40 p-3 rounded-xl text-sm border border-white/10">
+<input id="nBal" type="number" placeholder="saldo inicial ₲" class="bg-black/40 p-3 rounded-xl text-sm border border-white/10">
+<input id="nNote" placeholder="nota interna ej: paga lunes" class="bg-black/40 p-3 rounded-xl text-sm border border-white/10">
+</div><button onclick="createR()" id="btnCreate" class="w-full bg-green-600 py-3 rounded-xl font-bold text-sm mt-3">Crear revendedor</button></div>
+<div class="card p-6"><div class="flex gap-2 mb-4">
+<input id="search" oninput="render()" placeholder="🔍 Buscar revendedor..." class="flex-1 bg-black/40 p-3 rounded-xl text-sm border border-white/10">
+<button onclick="loadList()" class="bg-white/10 px-4 rounded-xl text-sm">🔄</button></div>
+<div id="list" class="space-y-2"></div></div>
+</div>
+<div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50"><div class="card p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+<h3 class="font-bold mb-1">👤 <span id="m-user"></span></h3><p id="m-note" class="text-xs text-gray-500 mb-4"></p>
+<div class="grid grid-cols-2 gap-2 mb-3">
+<input id="m-amt" type="number" placeholder="Monto ₲" class="bg-black/40 p-3 rounded-xl text-sm border border-white/10 col-span-2">
+<button onclick="mAdd(1)" class="bg-green-600 py-3 rounded-xl font-bold text-sm">+ Cargar</button>
+<button onclick="mAdd(-1)" class="bg-orange-600 py-3 rounded-xl font-bold text-sm">- Descontar</button></div>
+<div class="flex gap-2 mb-4"><input id="m-pass" placeholder="Nueva contraseña" class="flex-1 bg-black/40 p-3 rounded-xl text-sm border border-white/10"><button onclick="mPass()" class="bg-blue-600 px-4 rounded-xl text-sm font-bold">🔑</button></div>
+<div class="flex gap-2 mb-4"><input id="m-noteIn" placeholder="Nota interna" class="flex-1 bg-black/40 p-3 rounded-xl text-sm border border-white/10"><button onclick="mSaveNote()" class="bg-purple-600 px-4 rounded-xl text-sm font-bold">💾</button></div>
+<h4 class="font-bold text-sm mb-2">📜 Últimos movimientos</h4><div id="m-moves" class="space-y-2 text-sm max-h-60 overflow-y-auto"></div>
+<div class="flex gap-2 mt-4"><button onclick="mToggle()" id="m-toggleBtn" class="flex-1 bg-white/10 py-3 rounded-xl text-sm font-bold">⏸️ Pausar</button><button onclick="closeModal()" class="flex-1 bg-white/5 py-3 rounded-xl text-sm">Cerrar</button></div>
+<button onclick="mDelete()" class="w-full mt-2 text-red-400 text-xs py-2">Eliminar definitivamente</button>
+</div></div>
+<script>
+const API='https://smmcell-production.up.railway.app/api'; const MASTER_KEY='JAVI123';
+const H={'Content-Type':'application/json','x-master-key':MASTER_KEY};
+let DATA=[],SEL=null;
+function unlock(){if(document.getElementById('key').value===MASTER_KEY){document.getElementById('lock').classList.add('hidden');document.getElementById('main').classList.remove('hidden');loadList();}else alert('❌ Clave incorrecta');}
+async function createR(){const user=document.getElementById('nUser').value.trim().toLowerCase(),pass=document.getElementById('nPass').value,balance=Number(document.getElementById('nBal').value||0),note=document.getElementById('nNote').value.trim();if(!user||!pass)return alert('Completa usuario y contraseña');const b=document.getElementById('btnCreate');b.disabled=true;b.textContent='Creando...';try{const r=await fetch(API+'/admin/reseller-create',{method:'POST',headers:H,body:JSON.stringify({user,pass,balance,note})});const d=await r.json();if(!r.ok)throw new Error(d.error);alert('✅ Creado');['nUser','nPass','nBal','nNote'].forEach(i=>document.getElementById(i).value='');loadList();}catch(e){alert('❌ '+e.message)}b.disabled=false;b.textContent='Crear revendedor';}
+async function loadList(){try{DATA=await fetch(API+'/admin/resellers',{headers:{'x-master-key':MASTER_KEY}}).then(r=>r.json());render();}catch(e){document.getElementById('list').innerHTML='<p class="text-red-400 text-center">Error al cargar</p>'}}
+function render(){const q=(document.getElementById('search').value||'').toLowerCase();const list=DATA.filter(r=>r.user.toLowerCase().includes(q));const total=list.reduce((s,r)=>s+Number(r.balance||0),0);const paused=list.filter(r=>r.active===false).length;document.getElementById('totalR').textContent=list.length+' total';document.getElementById('statTotal').textContent='₲'+total.toLocaleString();document.getElementById('statActive').textContent=list.length-paused;document.getElementById('statPaused').textContent=paused;document.getElementById('list').innerHTML=list.map(r=>{const p=r.active===false;return `<div onclick="openModal('${r.user}')" class="bg-black/30 border border-white/5 p-4 rounded-xl flex justify-between items-center cursor-pointer hover:bg-white/5 ${p?'opacity-50':''}"><div><p class="font-mono font-bold ${p?'line-through text-gray-500':'text-blue-300'}">@${r.user}</p>${p?'<span class="text-[10px] bg-yellow-600 px-2 py-0.5 rounded-full">PAUSADO</span>':''}<p class="text-[11px] text-gray-500">${r.note||''}</p></div><div class="text-right"><p class="font-black text-green-400">₲${Number(r.balance).toLocaleString()}</p><p class="text-[11px] text-gray-500">clic →</p></div></div>`;}).join('')||'<p class="text-gray-500 text-center py-8">Sin resultados</p>';}
+function openModal(user){SEL=user;const o=DATA.find(r=>r.user===user)||{};document.getElementById('m-user').textContent='@'+user;document.getElementById('m-note').textContent=o.note||'Sin nota';document.getElementById('m-noteIn').value=o.note||'';document.getElementById('m-toggleBtn').textContent=o.active===false?'▶️ Activar':'⏸️ Pausar';document.getElementById('modal').classList.remove('hidden');loadMoves();}
+function closeModal(){document.getElementById('modal').classList.add('hidden');SEL=null;}
+async function loadMoves(){try{const d=await fetch(API+'/reseller-moves/'+SEL).then(r=>r.json());document.getElementById('m-moves').innerHTML=d.slice(0,30).map(m=>`<div class="bg-black/20 p-2 rounded-lg flex justify-between text-xs"><span>${m.client} <span class="text-gray-500">${(m.date||'').slice(0,10)}</span></span><b class="text-green-400">₲${Number(m.amount).toLocaleString()}</b></div>`).join('')||'<p class="text-gray-500 text-xs">Sin movimientos</p>';}catch(e){}}
+async function mAdd(s){const amt=Number(document.getElementById('m-amt').value)*s;if(!amt)return alert('Monto inválido');if(!confirm(`${amt>0?'+':'-'} ₲${Math.abs(amt).toLocaleString()} a ${SEL}?`))return;await fetch(API+'/admin/reseller-add',{method:'POST',headers:H,body:JSON.stringify({user:SEL,amount:amt})});document.getElementById('m-amt').value='';loadList();}
+async function mPass(){const np=document.getElementById('m-pass').value;if(np.length<4)return alert('Mínimo 4 caracteres');await fetch(API+'/admin/reseller-pass',{method:'POST',headers:H,body:JSON.stringify({user:SEL,newPass:np})});alert('✅ Actualizada');document.getElementById('m-pass').value='';}
+async function mSaveNote(){const note=document.getElementById('m-noteIn').value.trim();await fetch(API+'/admin/reseller-note',{method:'POST',headers:H,body:JSON.stringify({user:SEL,note})});alert('✅ Guardada');loadList();openModal(SEL);}
+async function mToggle(){await fetch(API+'/admin/reseller-toggle',{method:'POST',headers:H,body:JSON.stringify({user:SEL})});loadList();openModal(SEL);}
+async function mDelete(){if(!confirm('¿Eliminar a '+SEL+'?'))return;await fetch(API+'/admin/reseller-delete',{method:'POST',headers:H,body:JSON.stringify({user:SEL})});closeModal();loadList();}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal()});
+</script></body></html>
