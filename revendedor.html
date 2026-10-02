@@ -39,7 +39,7 @@
 <button onclick="logout()" class="w-full bg-red-600/20 border border-red-500/30 py-3 rounded-xl font-bold text-sm">Salir</button>
 </div>
 <script>
-const API='https://smmcell-production.up.railway.app/api';
+const API='https://panel-smm-javi-cell-40-production.up.railway.app/api';
 let RU='',RP='',MOVES=[];
 function setAmt(v){document.getElementById('amt').value=v;checkBalanceLimit();}
 function checkBalanceLimit(){const amount=Number(document.getElementById('amt').value||0);const balNum=Number(document.getElementById('bal').textContent.replace(/\D/g,''))||0;document.getElementById('limitWarning').classList.toggle('hidden',amount<=balNum);}

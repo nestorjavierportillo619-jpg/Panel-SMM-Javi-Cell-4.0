@@ -126,7 +126,7 @@ body{background:#0b0e14;font-family:Inter,system-ui,sans-serif;color:#f3f4f6}
 const firebaseConfig={apiKey:"AIzaSyALswg4dgodrGIjg7mKgR9gM5iZISg_JqU",authDomain:"javicellpy.firebaseapp.com",projectId:"javicellpy"};
 firebase.initializeApp(firebaseConfig);
 const auth=firebase.auth();
-const API='https://smmcell-production.up.railway.app/api';
+const API='https://panel-smm-javi-cell-40-production.up.railway.app/api';
 const GRAD='linear-gradient(135deg,#ff00cc,#7b2ff7)';
 function showToast(m,t='success'){const c=document.getElementById('toast-container');const d=document.createElement('div');d.className='toast';d.innerHTML=`<span>${t==='success'?'✅':'❌'}</span><span>${esc(m)}</span>`;c.appendChild(d);setTimeout(()=>d.remove(),3500);}
 function setCookie(n,v,d=30){const e=new Date();e.setTime(e.getTime()+d*864e5);document.cookie=`${n}=${encodeURIComponent(v)};expires=${e.toUTCString()};path=/;SameSite=Lax`;}
