@@ -41,7 +41,7 @@
 <button onclick="mDelete()" class="w-full mt-2 text-red-400 text-xs py-2">Eliminar definitivamente</button>
 </div></div>
 <script>
-const API='https://panel-smm-javi-cell-40-production.up.railway.app/api'; const MASTER_KEY='JAVI123';
+const API='https://seguidoresjavicellpy.up.railway.app/api'; const MASTER_KEY='JAVI123';
 const H={'Content-Type':'application/json','x-master-key':MASTER_KEY};
 let DATA=[],SEL=null;
 function unlock(){if(document.getElementById('key').value===MASTER_KEY){document.getElementById('lock').classList.add('hidden');document.getElementById('main').classList.remove('hidden');loadList();}else alert('❌ Clave incorrecta');}
