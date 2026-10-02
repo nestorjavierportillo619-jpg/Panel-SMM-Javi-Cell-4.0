@@ -41,6 +41,7 @@ async function saveDB() {
   catch (e) { console.error('❌ Error guardar:', e.message); }
 }
 
+app.get('/', (req,res)=>res.send('JAVI SMM API v3.3 online 🦊'));
 app.get('/api/health', (req, res) => res.json({ ok: true, version: 'v3.3-supabase' }));
 app.get('/api/public-settings', (req,res)=>res.json({whatsapp:db.settings.whatsapp, announce:db.settings.announce||''}));
 app.get('/api/settings', authMaster, (req,res)=>res.json(db.settings));
