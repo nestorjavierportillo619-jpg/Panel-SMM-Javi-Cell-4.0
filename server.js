@@ -5,7 +5,7 @@ const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const MASTER_KEY = 'JAVI123';
+const MASTER_KEY = process.env.MASTER_KEY || 'Romi';
 
 app.use(cors());
 app.use(express.json());
@@ -41,7 +41,6 @@ async function saveDB() {
   catch (e) { console.error('❌ Error guardar:', e.message); }
 }
 
-app.get('/', (req,res)=>res.send('JAVI SMM API v3.3 online 🦊'));
 app.get('/api/health', (req, res) => res.json({ ok: true, version: 'v3.3-supabase' }));
 app.get('/api/public-settings', (req,res)=>res.json({whatsapp:db.settings.whatsapp, announce:db.settings.announce||''}));
 app.get('/api/settings', authMaster, (req,res)=>res.json(db.settings));
@@ -148,7 +147,7 @@ app.post('/api/reseller-load',(req,res)=>{
 });
 app.post('/api/reseller-change-pass',(req,res)=>{
   const r=db.resellers.find(x=>x.user===String(req.body.user||'').toLowerCase());
-  if(!r||r.pass!==req.body.pass) return res.json({error:'No autorizado'});
+  if(!r||r.pass!==req.body.newPass) return res.json({error:'No autorizado'});
   r.pass=req.body.newPass; saveDB(); res.json({ok:true});
 });
 app.get('/api/admin/resellers', authMaster, (req,res)=>res.json(db.resellers));
