@@ -194,12 +194,12 @@ input,select{outline:none}
 </div>
 
 <div class="card p-6 md:col-span-2">
-<h3 class="font-bold text-base mb-4 text-orange-400 flex items-center gap-2">🔧 Herramientas de Mantenimiento y Sincronización</h3>
+<h3 class="font-bold text-base mb-4 text-orange-400 flex items-center gap-2">🔧 Herramientas de Mantenimiento y Sincronización Segura</h3>
 <div class="flex gap-3 flex-wrap">
-<button onclick="syncServices()" id="btn-sync" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 px-6 py-3.5 rounded-xl font-bold text-sm shadow transition">🔄 Sincronizar Servicios con APIs</button>
+<button onclick="syncServices()" id="btn-sync" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 px-6 py-3.5 rounded-xl font-bold text-sm shadow transition">🔄 Sincronizar Servicios (Protección Offline)</button>
 <button onclick="init()" class="bg-white/10 hover:bg-white/15 px-6 py-3.5 rounded-xl font-bold text-sm transition">↻ Recargar Datos del Servidor</button>
 </div>
-<p class="text-xs text-gray-500 mt-3">La sincronización busca automáticamente nuevos servicios o cambios de tarifas en los proveedores activos.</p>
+<p id="syncResultMsg" class="text-xs text-gray-400 mt-3">La sincronización con margen automático protege tus servicios locales ante cualquier caída o desconexión del proveedor.</p>
 </div>
 </div>
 </div>
@@ -250,7 +250,7 @@ async function init(){
     await Promise.all([loadProv(),loadServ(),loadUsers(),loadRes(),loadOrders(),loadSettings()]); 
     showToast('Panel sincronizado con éxito ✅'); 
   } catch(e) {
-    showToast('⚠️ Error al conectar con el servidor', false);
+    showToast('⚠️️ Error al conectar con el servidor', false);
   }
 }
 
@@ -512,13 +512,29 @@ async function saveSettings(){
 
 async function syncServices(){ 
   const btn = document.getElementById('btn-sync');
-  btn.textContent = '🔄 Sincronizando APIs...';
+  const msg = document.getElementById('syncResultMsg');
+  btn.disabled = true;
+  btn.textContent = '🔄 Verificando conexión y sincronizando...';
+  msg.textContent = 'Conectando con la API del proveedor de forma segura...';
+  msg.style.color = 'orange';
+
   try {
-    await fetch(API+'/sync-services',{method:'POST',headers:HA}); 
+    const res = await fetch(API+'/sync-services',{method:'POST',headers:HA});
+    const data = await res.json().catch(() => ({}));
+    
     await loadServ(); 
+    btn.disabled = false;
+    btn.textContent = '🔄 Sincronizar Servicios (Protección Offline)';
+    msg.style.color = 'green';
+    msg.textContent = '✅ Sincronización completada de forma segura (Catálogo protegido ante caídas).';
     showToast('✅ <b>Servicios sincronizados</b> con éxito'); 
-  } catch(e) { showToast('❌ Error al sincronizar servicios', false); }
-  btn.textContent = '🔄 Sincronizar Servicios con APIs';
+  } catch(e) { 
+    btn.disabled = false;
+    btn.textContent = '🔄 Sincronizar Servicios (Protección Offline)';
+    msg.style.color = 'red';
+    msg.textContent = '⚠️ Proveedor offline o error de red. Se mantuvo el catálogo local intacto.';
+    showToast('⚠️ Proveedor offline. Catálogo local protegido.', false); 
+  }
 }
 </script>
 </body>
