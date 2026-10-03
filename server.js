@@ -1,11 +1,11 @@
-// server.js - JAVI SMM Pro v3.3 FULL SUPABASE
+// server.js - JAVI SMM Pro v3.3 FULL SUPABASE - PARCHEADO OFFLINE
 const express = require('express');
 const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const MASTER_KEY = process.env.MASTER_KEY || 'Romi';
+const MASTER_KEY = 'Romi';
 
 app.use(cors());
 app.use(express.json());
@@ -29,19 +29,36 @@ let db = {
   settings: { whatsapp: '595983399906', margin: 30, usd_gs: 7500, announce: '' }
 };
 
+let dbLoaded = false;
+
 async function loadDB() {
   try {
     const { data: row } = await supabase.from('app_store').select('*').eq('key', 'main_db').single();
-    if (row && row.data) { db = {...db,...row.data }; console.log('✅ DB cargada desde Supabase'); }
-    else { await saveDB(); console.log('📦 DB inicializada'); }
-  } catch (e) { console.error('⚠ Error Supabase:', e.message); }
+    if (row && row.data) {
+      db = {...db,...row.data };
+      dbLoaded = true;
+      console.log('✅ DB cargada desde Supabase');
+    }
+    else {
+      await supabase.from('app_store').upsert({ key: 'main_db', data: db });
+      dbLoaded = true;
+      console.log('📦 DB inicializada');
+    }
+  } catch (e) {
+    console.error('⚠ Error Supabase (offline, no se cargó):', e.message);
+    dbLoaded = false;
+  }
 }
 async function saveDB() {
+  if (!dbLoaded) {
+    console.log('⏸️ saveDB omitido: DB no cargada (offline)');
+    return;
+  }
   try { await supabase.from('app_store').upsert({ key: 'main_db', data: db }); }
   catch (e) { console.error('❌ Error guardar:', e.message); }
 }
 
-app.get('/api/health', (req, res) => res.json({ ok: true, version: 'v3.3-supabase' }));
+app.get('/api/health', (req, res) => res.json({ ok: true, version: 'v3.3-supabase-parcheado' }));
 app.get('/api/public-settings', (req,res)=>res.json({whatsapp:db.settings.whatsapp, announce:db.settings.announce||''}));
 app.get('/api/settings', authMaster, (req,res)=>res.json(db.settings));
 app.post('/api/settings', authMaster, (req,res)=>{ db.settings={...db.settings,...req.body}; saveDB(); res.json({ok:true}); });
@@ -147,14 +164,14 @@ app.post('/api/reseller-load',(req,res)=>{
 });
 app.post('/api/reseller-change-pass',(req,res)=>{
   const r=db.resellers.find(x=>x.user===String(req.body.user||'').toLowerCase());
-  if(!r||r.pass!==req.body.newPass) return res.json({error:'No autorizado'});
+  if(!r||r.pass!==req.body.pass) return res.json({error:'No autorizado'});
   r.pass=req.body.newPass; saveDB(); res.json({ok:true});
 });
 app.get('/api/admin/resellers', authMaster, (req,res)=>res.json(db.resellers));
 app.post('/api/admin/reseller-create', authMaster, (req,res)=>{
   const user=String(req.body.user||'').toLowerCase().trim();
   if(db.resellers.find(x=>x.user===user)) return res.status(400).json({error:'Ya existe'});
-  db.resellers.push({user,pass:req.body.pass,balance:Number(req.body.balance||0),note:'',active:true});
+  db.resellers.push({user,pass:req.body.pass,balance:Number(req.body.balance||0),note:req.body.note||'',active:true});
   saveDB(); res.json({ok:true});
 });
 app.post('/api/admin/reseller-add', authMaster, (req,res)=>{
