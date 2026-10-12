@@ -4,138 +4,146 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="google-site-verification" content="a80a7451bd26da76" />
-<title>JaviCell PY 🦊 | Panel SMM Profesional #1 en Paraguay</title>
-<meta name="description" content="Panel SMM #1 en Paraguay. Compra seguidores, likes, views para Instagram, TikTok, Facebook y YouTube. Entrega automática, precios en guaraníes y soporte real.">
+<title>JaviCell PY ✨ | Panel SMM Exclusivo en Paraguay</title>
+<meta name="description" content="Panel SMM profesional y elegante en Paraguay. Crecimiento estratégico para Instagram, TikTok, Facebook y YouTube. Calidad superior y atención personalizada.">
 <link rel="canonical" href="https://tiendasmm.netlify.app/">
-<meta property="og:title" content="JaviCell PY - Panel SMM Profesional">
-<meta property="og:description" content="Servicios SMM automatizados en Paraguay.">
+<meta property="og:title" content="JaviCell PY - Panel SMM Exclusivo">
+<meta property="og:description" content="Servicios SMM automatizados y profesionales en Paraguay.">
 <meta property="og:url" content="https://tiendasmm.netlify.app/">
 <meta property="og:type" content="website">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
-tailwind.config={darkMode:'class',theme:{extend:{colors:{darkBg:'#0b0e14',cardBg:'#151b26'}}}}
+tailwind.config={darkMode:'class',theme:{extend:{colors:{darkBg:'#0b090e',cardBg:'#141019',accentPink:'#e879f9',accentRose:'#fb7185'}}}}
 </script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <style>
-body{background:#0b0e14;font-family:Inter,system-ui,sans-serif;color:#f3f4f6}
-.card{background:#151b26;border:1px solid rgba(255,255,255,.07);border-radius:1rem}
-.modal-bg{background:rgba(0,0,0,.82);backdrop-filter:blur(6px)}
-.badge{font-size:10px;padding:3px 8px;border-radius:99px;font-weight:800}
-.skeleton{animation:p 1.2s infinite;background:#1f2735;border-radius:1rem;min-height:130px}
+body{background:#0b090e;font-family:Inter,system-ui,sans-serif;color:#f3f4f6}
+.card{background:#141019;border:1px solid rgba(251,113,133,0.12);border-radius:1.25rem;transition:all .3s ease}
+.card:hover{border-color:rgba(251,113,133,0.3);transform:translateY(-2px)}
+.modal-bg{background:rgba(5,3,8,.85);backdrop-filter:blur(8px)}
+.badge{font-size:10px;padding:3px 9px;border-radius:99px;font-weight:700}
+.skeleton{animation:p 1.2s infinite;background:#1a1421;border-radius:1.25rem;min-height:130px}
 @keyframes p{0%,100%{opacity:.4}50%{opacity:1}}
 #announce:empty{display:none}
 #toast-container{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;gap:10px;width:90%;max-width:400px}
-.toast{background:#151b26;border:1px solid rgba(255,255,255,.1);padding:12px 16px;border-radius:12px;display:flex;gap:10px;font-size:13px;animation:su.3s ease}
+.toast{background:#141019;border:1px solid rgba(251,113,133,0.2);padding:12px 16px;border-radius:16px;display:flex;gap:10px;font-size:13px;animation:su.3s ease}
 @keyframes su{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
 </style>
 </head>
 <body class="min-h-screen pb-12">
 <div id="toast-container"></div>
-<div id="announce" class="bg-gradient-to-r from-orange-600 to-red-600 text-center text-xs font-bold py-2 px-4"></div>
-<header class="p-4 flex justify-between items-center max-w-6xl mx-auto sticky top-0 bg-[#0b0e14]/95 backdrop-blur z-40 border-b border-white/5">
-<div class="flex items-center gap-2.5 cursor-pointer" onclick="showTab('catalogo')">
-<div class="w-9 h-9 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center text-xl">🦊</div>
-<div class="font-black text-base">JaviCell <span class="text-blue-400">PY</span></div>
+<div id="announce" class="bg-gradient-to-r from-pink-600 via-rose-600 to-purple-600 text-center text-xs font-bold py-2 px-4 shadow-lg"></div>
+<header class="p-4 flex justify-between items-center max-w-6xl mx-auto sticky top-0 bg-[#0b090e]/90 backdrop-blur z-40 border-b border-white/5">
+<div class="flex items-center gap-3 cursor-pointer" onclick="showTab('catalogo')">
+<div class="w-10 h-10 bg-gradient-to-tr from-rose-500 via-pink-500 to-purple-500 rounded-2xl flex items-center justify-center text-xl shadow-md shadow-pink-500/20">🦊</div>
+<div class="font-black text-base tracking-wide">RJ SEGUIDORES<span class="text-rose-400 font-medium">PY</span></div>
 </div>
-<div class="flex gap-2.5 items-center">
-<span id="userBal" class="hidden text-xs bg-green-500/15 text-green-300 border border-green-500/20 px-3 py-1.5 rounded-full font-bold">₲0</span>
-<button id="btnLogin" onclick="openProfile()" class="bg-gradient-to-r from-blue-600 to-purple-600 px-5 py-2 rounded-xl text-sm font-bold">Iniciar Sesión</button>
+<div class="flex gap-3 items-center">
+<span id="userBal" class="hidden text-xs bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 px-3.5 py-1.5 rounded-full font-bold">₲0</span>
+<button id="btnLogin" onclick="openProfile()" class="bg-gradient-to-r from-rose-500 to-pink-600 hover:opacity-90 px-5 py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-rose-500/25 transition">Iniciar Sesión</button>
 </div>
 </header>
-<div class="max-w-6xl mx-auto px-4 mt-6">
-<div class="rounded-3xl p-8 text-center bg-gradient-to-br from-blue-900/40 via-[#151b26] to-purple-900/20 border border-white/10">
-<span class="bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[11px] font-extrabold px-3 py-1 rounded-full uppercase mb-3 inline-block">Panel Automatizado Oficial</span>
-<h1 class="text-3xl md:text-4xl font-black mb-3">🦊 Panel SMM #1 en Paraguay</h1>
-<p class="text-gray-300 text-sm mb-6 max-w-lg mx-auto">Servicios sincronizados directamente con el proveedor. Entrega rápida y soporte real.</p>
-<div class="flex justify-center gap-3 flex-wrap">
-<button onclick="document.getElementById('list').scrollIntoView({behavior:'smooth'})" class="bg-gradient-to-r from-blue-600 to-purple-600 px-7 py-3 rounded-xl font-black text-sm">Ver servicios 👇</button>
-<button onclick="openModalFAQ()" class="bg-white/5 border border-white/10 px-6 py-3 rounded-xl font-bold text-sm">❓ Ayuda / FAQ</button>
+
+<!-- Banner Principal Compacto y Estilizado -->
+<div class="max-w-6xl mx-auto px-4 mt-4">
+<div class="rounded-3xl p-5 md:p-6 text-center bg-gradient-to-br from-purple-950/40 via-[#141019] to-rose-950/30 border border-rose-500/15 shadow-xl relative overflow-hidden">
+<div class="absolute -right-10 -top-10 w-32 h-32 bg-pink-500/10 rounded-full blur-2xl pointer-events-none"></div>
+<span class="bg-rose-500/10 text-rose-300 border border-rose-500/20 text-[10px] font-extrabold px-3 py-0.5 rounded-full uppercase tracking-wider mb-2 inline-block">Plataforma Profesional Verificada</span>
+<h1 class="text-2xl md:text-3xl font-black mb-2 tracking-tight bg-gradient-to-r from-white via-pink-100 to-rose-200 bg-clip-text text-transparent">Impulsa tu Presencia Digital ✨</h1>
+<p class="text-gray-300 text-xs md:text-sm mb-4 max-w-md mx-auto font-light leading-relaxed">Servicios SMM automatizados con la más alta calidad en Paraguay. Diseñado para creadoras, emprendedoras y marcas con estilo.</p>
+<div class="flex justify-center gap-2.5 flex-wrap">
+<button onclick="document.getElementById('list').scrollIntoView({behavior:'smooth'})" class="bg-gradient-to-r from-rose-500 to-pink-600 hover:opacity-95 px-5 py-2.5 rounded-xl font-bold text-xs shadow-lg shadow-rose-500/20 transition">Explorar Catálogo 🌸</button>
+<button onclick="openModalFAQ()" class="bg-white/5 hover:bg-white/10 border border-white/10 px-5 py-2.5 rounded-xl font-bold text-xs transition">❓ Guía y FAQ</button>
 </div>
 </div>
 </div>
+
 <div class="max-w-6xl mx-auto p-4">
-<div class="card p-4 flex flex-col md:flex-row justify-between items-center gap-4">
+<div class="card p-4 flex flex-col md:flex-row justify-between items-center gap-3 bg-gradient-to-r from-[#141019] to-[#1c1322]">
 <div class="flex items-center gap-3">
-<div class="w-10 h-10 rounded-xl bg-green-500/15 flex items-center justify-center text-green-400 text-xl">💳</div>
+<div class="w-10 h-10 rounded-2xl bg-emerald-500/15 flex items-center justify-center text-emerald-400 text-lg shadow-inner">💎</div>
 <div>
-<h3 class="font-bold text-sm">¿Cómo recargar saldo?</h3>
-<p class="text-xs text-gray-400 mt-0.5">1. Entrá con Google en <b>Iniciar Sesión</b>. 2. Copiá tu usuario. 3. <a id="wa-link" href="#" target="_blank" class="text-green-400 underline font-bold">Pedí recarga por WhatsApp</a></p>
+<h3 class="font-bold text-xs text-pink-100">¿Cómo realizar recargas de saldo?</h3>
+<p class="text-xs text-gray-400 mt-0.5">1. Iniciá sesión con Google. 2. Copiá tu usuario. 3. <a id="wa-link" href="#" target="_blank" class="text-rose-400 underline font-semibold">Solicitá recarga vía WhatsApp instantánea</a></p>
 </div>
 </div>
 </div>
 </div>
-<div class="max-w-6xl mx-auto px-4 flex gap-2 mb-4 overflow-x-auto pb-1">
-<button onclick="showTab('catalogo')" id="tabBtnCat" class="px-5 py-2.5 rounded-xl text-sm font-bold text-white" style="background:linear-gradient(135deg,#ff00cc,#7b2ff7)">📦 Catálogo</button>
-<button onclick="showTab('pedidos')" id="tabBtnPed" class="bg-white/5 border border-white/10 px-5 py-2.5 rounded-xl text-sm">🧾 Mis Pedidos</button>
+<div class="max-w-6xl mx-auto px-4 flex gap-2.5 mb-4 overflow-x-auto pb-1">
+<button onclick="showTab('catalogo')" id="tabBtnCat" class="px-5 py-2 rounded-xl text-xs font-bold text-white shadow-md shadow-pink-500/20" style="background:linear-gradient(135deg,#fb7185,#e879f9)">🌸 Catálogo Exclusivo</button>
+<button onclick="showTab('pedidos')" id="tabBtnPed" class="bg-white/5 hover:bg-white/10 border border-white/10 px-5 py-2 rounded-xl text-xs font-medium transition">🛍️ Mis Pedidos</button>
 </div>
 <section id="tab-catalogo" class="max-w-6xl mx-auto px-4 pb-8">
 <div class="relative mb-3">
-<input id="search" placeholder="🔍 Buscar servicios..." class="w-full bg-[#151b26] p-3.5 pl-11 rounded-xl text-sm border border-white/10 outline-none">
-<span class="absolute left-4 top-3.5 text-gray-400 text-sm">🔍</span>
+<input id="search" placeholder="🔍 Buscar servicios o redes sociales..." class="w-full bg-[#141019] p-3.5 pl-11 rounded-2xl text-xs border border-rose-500/20 focus:border-rose-400 outline-none transition shadow-inner">
+<span class="absolute left-4 top-3.5 text-gray-400 text-xs">🔍</span>
 </div>
 <div id="platGrid" class="grid grid-cols-5 md:grid-cols-9 gap-2 my-3"></div>
-<div id="loading" class="grid md:grid-cols-2 gap-3 mt-4"><div class="skeleton"></div><div class="skeleton"></div></div>
+<div id="loading" class="grid md:grid-cols-2 gap-4 mt-4"><div class="skeleton"></div><div class="skeleton"></div></div>
 <div id="list" class="grid md:grid-cols-2 gap-3"></div>
 <div id="errBox" class="hidden text-center py-12 card p-8 my-4">
-<p class="text-red-400 mb-3">❌ No se pudo cargar. Reintentando...</p>
-<button onclick="init()" class="bg-blue-600 px-6 py-2.5 rounded-xl font-bold text-sm">Reintentar</button>
+<p class="text-rose-400 mb-3 text-xs">❌ No se pudo conectar con el servidor. Reintentando...</p>
+<button onclick="init()" class="bg-rose-600 px-5 py-2 rounded-xl font-bold text-xs shadow-md">Reintentar conexión</button>
 </div>
 </section>
 <section id="tab-pedidos" class="max-w-6xl mx-auto px-4 hidden pb-12">
-<div class="flex justify-between items-center mb-4">
-<h2 class="font-black text-lg">🧾 Mis Pedidos</h2>
-<button onclick="renderOrders()" class="text-xs bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg">🔄 Actualizar</button>
+<div class="flex justify-between items-center mb-3">
+<h2 class="font-black text-base">🛍️ Historial de Pedidos</h2>
+<button onclick="renderOrders()" class="text-xs bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-1.5 rounded-xl transition">🔄 Actualizar</button>
 </div>
 <div id="ordersList" class="space-y-3"></div>
 </section>
-<footer class="max-w-6xl mx-auto px-4 border-t border-white/10 pt-8 pb-12 text-xs text-gray-500 text-center">© 2026 JaviCell PY 🦊 - tiendasmm.netlify.app</footer>
+<footer class="max-w-6xl mx-auto px-4 border-t border-white/5 pt-6 pb-10 text-xs text-gray-500 text-center">© 2026 RJ Seguidores PY ✨ - Elegancia y rendimiento digital</footer>
 <div id="profileModal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4" onclick="if(event.target===this)closeProfile()">
-<div class="card p-6 w-full max-w-md rounded-3xl">
-<div class="flex justify-between items-center mb-4"><h3 class="font-black">👤 Mi Cuenta</h3><button onclick="closeProfile()" class="bg-white/10 w-8 h-8 rounded-full">✕</button></div>
-<div id="loginBox"><button onclick="login()" class="w-full bg-white text-black py-3 rounded-xl font-bold text-sm">Continuar con Google</button></div>
+<div class="card p-6 w-full max-w-md rounded-3xl shadow-2xl border-rose-500/20">
+<div class="flex justify-between items-center mb-4"><h3 class="font-black text-base">👤 Mi Cuenta</h3><button onclick="closeProfile()" class="bg-white/10 w-8 h-8 rounded-full flex items-center justify-center text-xs">✕</button></div>
+<div id="loginBox"><button onclick="login()" class="w-full bg-white text-black hover:bg-gray-100 py-3.5 rounded-2xl font-bold text-xs shadow-md transition flex items-center justify-center gap-2">✨ Continuar con Google</button></div>
 <div id="userBox" class="hidden">
-<div class="bg-black/30 p-4 rounded-2xl mb-4"><p class="text-[11px] text-gray-400 mb-1">Tu usuario:</p><div class="flex gap-2"><code id="myUsername" class="flex-1 bg-black/50 p-2.5 rounded-xl font-mono text-blue-300 text-center font-bold text-sm">-</code><button onclick="copiarUsuario()" class="bg-blue-600 px-4 rounded-xl text-xs font-bold">📋 Copiar</button></div></div>
-<div class="grid grid-cols-2 gap-2 mb-4">
-<div class="bg-green-500/10 border border-green-500/20 p-4 rounded-2xl text-center"><p class="text-[11px] text-gray-400">Saldo</p><p id="myBalance" class="font-black text-green-400 text-xl">₲0</p></div>
-<div class="bg-blue-500/10 border border-blue-500/20 p-4 rounded-2xl text-center"><p class="text-[11px] text-gray-400">Pedidos</p><p id="myOrdersCount" class="font-black text-blue-400 text-xl">0</p></div>
+<div class="bg-black/40 p-4 rounded-2xl mb-4 border border-white/5"><p class="text-[11px] text-gray-400 mb-1">Tu usuario único:</p><div class="flex gap-2"><code id="myUsername" class="flex-1 bg-black/60 p-2.5 rounded-xl font-mono text-pink-300 text-center font-bold text-xs">-</code><button onclick="copiarUsuario()" class="bg-rose-600 hover:bg-rose-500 px-4 rounded-xl text-xs font-bold transition">📋 Copiar</button></div></div>
+<div class="grid grid-cols-2 gap-3 mb-4">
+<div class="bg-emerald-500/10 border border-emerald-500/20 p-3.5 rounded-2xl text-center"><p class="text-[11px] text-gray-400">Saldo Disponible</p><p id="myBalance" class="font-black text-emerald-400 text-lg">₲0</p></div>
+<div class="bg-purple-500/10 border border-purple-500/20 p-3.5 rounded-2xl text-center"><p class="text-[11px] text-gray-400">Pedidos Totales</p><p id="myOrdersCount" class="font-black text-purple-400 text-lg">0</p></div>
 </div>
-<button id="btnRecharge" class="w-full bg-green-600 py-3 rounded-2xl font-bold text-sm mb-3">💬 Recargar por WhatsApp</button>
-<button onclick="logout()" class="w-full bg-white/5 py-3 rounded-2xl text-xs text-red-400">Cerrar sesión</button>
+<button id="btnRecharge" class="w-full bg-emerald-600 hover:bg-emerald-500 py-3 rounded-2xl font-bold text-xs mb-3 shadow-lg shadow-emerald-600/20 transition">💬 Recargar Saldo por WhatsApp</button>
+<button onclick="logout()" class="w-full bg-white/5 hover:bg-white/10 py-2.5 rounded-2xl text-xs text-rose-400 transition">Cerrar sesión</button>
 </div>
 </div>
 </div>
 <div id="buyModal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4" onclick="if(event.target===this)closeModal()">
-<div class="card p-6 w-full max-w-md rounded-3xl">
-<div class="flex justify-between mb-2"><h3 id="mTitle" class="font-bold text-sm"></h3><button onclick="closeModal()" class="bg-white/10 w-7 h-7 rounded-full text-xs">✕</button></div>
-<div id="mMeta" class="text-xs text-gray-400 mb-4 bg-white/5 p-2 rounded-xl"></div>
-<label id="lblInput" class="text-xs font-bold">🔗 Link o Enlace</label>
-<input id="mLink" placeholder="https://..." class="w-full bg-black/40 p-3 rounded-xl text-sm mb-3 mt-1 border border-white/10">
-<label class="text-xs font-bold">🔢 Cantidad</label>
-<input id="mQty" type="number" class="w-full bg-black/40 p-3 rounded-xl text-sm mb-3 mt-1 border border-white/10">
-<div id="mPrice" class="bg-green-500/10 border border-green-500/20 text-green-400 font-black text-center p-3 rounded-xl mb-4 text-sm">Ingresá cantidad</div>
+<div class="card p-6 w-full max-w-md rounded-3xl shadow-2xl border-rose-500/20">
+<div class="flex justify-between mb-2"><h3 id="mTitle" class="font-bold text-xs text-pink-100"></h3><button onclick="closeModal()" class="bg-white/10 w-7 h-7 rounded-full flex items-center justify-center text-xs">✕</button></div>
+<div id="mMeta" class="text-xs text-gray-400 mb-3 bg-white/5 p-2 rounded-xl border border-white/5"></div>
+<label id="lblInput" class="text-xs font-bold text-rose-300">🔗 Link o Enlace</label>
+<input id="mLink" placeholder="https://..." class="w-full bg-black/50 p-3 rounded-xl text-xs mb-3 mt-1 border border-rose-500/20 focus:border-rose-400 outline-none">
+<label class="text-xs font-bold text-rose-300">🔢 Cantidad</label>
+<input id="mQty" type="number" class="w-full bg-black/50 p-3 rounded-xl text-xs mb-3 mt-1 border border-rose-500/20 focus:border-rose-400 outline-none">
+<div id="mPrice" class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-black text-center p-3 rounded-xl mb-3 text-xs">Ingresá cantidad</div>
 <div class="flex gap-2">
-<button onclick="closeModal()" class="flex-1 bg-white/10 py-3 rounded-xl font-bold text-sm">Cancelar</button>
-<button id="btnConfirm" onclick="confirmBuy()" class="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 py-3 rounded-xl font-bold text-sm">Confirmar</button>
+<button onclick="closeModal()" class="flex-1 bg-white/10 hover:bg-white/15 py-3 rounded-xl font-bold text-xs transition">Cancelar</button>
+<button id="btnConfirm" onclick="confirmBuy()" class="flex-1 bg-gradient-to-r from-rose-500 to-pink-600 hover:opacity-95 py-3 rounded-xl font-bold text-xs shadow-lg shadow-rose-500/25 transition">Confirmar Pedido</button>
 </div>
-<p id="mMsg" class="text-xs text-center mt-3"></p>
+<p id="mMsg" class="text-xs text-center mt-2"></p>
 </div>
 </div>
 <div id="faqModal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4" onclick="if(event.target===this)closeModalFAQ()">
-<div class="card p-6 w-full max-w-lg rounded-3xl max-h-[85vh] overflow-y-auto">
-<h3 class="font-black mb-4">❓ Ayuda</h3>
-<div class="text-xs text-gray-300 space-y-3"><div class="bg-white/5 p-3 rounded-xl"><b>Recargas:</b> Copiá tu usuario y envianos comprobante por WhatsApp.</div><div class="bg-white/5 p-3 rounded-xl"><b>Seguridad:</b> No pedimos contraseñas.</div></div>
-<button onclick="closeModalFAQ()" class="w-full bg-blue-600 py-3 rounded-xl font-bold text-sm mt-6">Entendido</button>
+<div class="card p-6 w-full max-w-lg rounded-3xl max-h-[85vh] overflow-y-auto shadow-2xl border-rose-500/20">
+<h3 class="font-black text-sm mb-3 text-pink-100">❓ Guía de Ayuda y Preguntas Frecuentes</h3>
+<div class="text-xs text-gray-300 space-y-2.5">
+<div class="bg-white/5 p-3 rounded-2xl border border-white/5"><b>Recargas:</b> Copiá tu usuario único desde "Mi Cuenta" y envianos el comprobante por WhatsApp para acreditar tus fondos al instante.</div>
+<div class="bg-white/5 p-3 rounded-2xl border border-white/5"><b>Seguridad:</b> Tu cuenta está protegida. Jamás solicitamos contraseñas ni datos sensibles.</div>
+</div>
+<button onclick="closeModalFAQ()" class="w-full bg-gradient-to-r from-rose-500 to-pink-600 hover:opacity-95 py-3 rounded-xl font-bold text-xs mt-5 shadow-lg shadow-rose-500/25 transition">Entendido</button>
 </div>
 </div>
-<a id="wa-float" href="#" target="_blank" class="fixed bottom-5 right-5 w-14 h-14 rounded-full flex items-center justify-center z-40" style="background:#25D366"><img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="w-8 h-8"></a>
+<a id="wa-float" href="#" target="_blank" class="fixed bottom-5 right-5 w-14 h-14 rounded-full flex items-center justify-center z-40 shadow-2xl hover:scale-105 transition" style="background:#25D366"><img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="w-7 h-7"></a>
 <script>
 const firebaseConfig={apiKey:"AIzaSyALswg4dgodrGIjg7mKgR9gM5iZISg_JqU",authDomain:"javicellpy.firebaseapp.com",projectId:"javicellpy"};
 firebase.initializeApp(firebaseConfig);
 const auth=firebase.auth();
 const API='https://seguidoresjavicellpy.up.railway.app/api';
-const GRAD='linear-gradient(135deg,#ff00cc,#7b2ff7)';
-function showToast(m,t='success'){const c=document.getElementById('toast-container');const d=document.createElement('div');d.className='toast';d.innerHTML=`<span>${t==='success'?'✅':'❌'}</span><span>${m}</span>`;c.appendChild(d);setTimeout(()=>d.remove(),3500);}
+const GRAD='linear-gradient(135deg,#fb7185,#e879f9)';
+function showToast(m,t='success'){const c=document.getElementById('toast-container');const d=document.createElement('div');d.className='toast';d.innerHTML=`<span>${t==='success'?'🌸':'❌'}</span><span>${m}</span>`;c.appendChild(d);setTimeout(()=>d.remove(),3500);}
 function setCookie(n,v,d=30){const e=new Date();e.setTime(e.getTime()+d*864e5);document.cookie=`${n}=${encodeURIComponent(v)};expires=${e.toUTCString()};path=/;SameSite=Lax`;}
 function getCookie(n){const m=document.cookie.match(new RegExp('(^| )'+n+'=([^;]+)'));return m?decodeURIComponent(m[2]):null;}
 function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -153,7 +161,7 @@ function openProfile(){document.getElementById('profileModal').classList.remove(
 function closeProfile(){document.getElementById('profileModal').classList.add('hidden');}
 function openModalFAQ(){document.getElementById('faqModal').classList.remove('hidden');}
 function closeModalFAQ(){document.getElementById('faqModal').classList.add('hidden');}
-function copiarUsuario(){if(currentUsername){navigator.clipboard.writeText(currentUsername);showToast('¡Usuario copiado!');}}
+function copiarUsuario(){if(currentUsername){navigator.clipboard.writeText(currentUsername);showToast('¡Usuario copiado con éxito!');}}
 function showTab(t){document.getElementById('tab-catalogo').classList.toggle('hidden',t!=='catalogo');document.getElementById('tab-pedidos').classList.toggle('hidden',t!=='pedidos');if(t!=='catalogo')renderOrders();}
 async function init(){
 document.getElementById('loading').classList.remove('hidden');document.getElementById('errBox').classList.add('hidden');
@@ -166,11 +174,11 @@ function renderPlats(){
   const ids=['instagram','tiktok','facebook','youtube'];
   document.getElementById('platGrid').innerHTML=`
     <div onclick="setPlat('all')" class="card p-2.5 text-center cursor-pointer" style="${currentPlat==='all'?`background:${GRAD};color:white`:''}">
-      <div class="text-xl">🌐</div><p class="text-[11px] font-bold">Todos</p>
+      <div class="text-base">🌐</div><p class="text-[10px] font-bold mt-1">Todos</p>
     </div>`+
-    ids.map(id=>`<div onclick="setPlat('${id}')" class="card p-2.5 text-center cursor-pointer" style="${currentPlat===id?`background:${GRAD};color:white`:''}"><img src="${ICONS[id]}" class="w-7 h-7 mx-auto bg-white rounded p-1"><p class="text-[11px] font-bold capitalize mt-1">${id}</p></div>`).join('')+
+    ids.map(id=>`<div onclick="setPlat('${id}')" class="card p-2.5 text-center cursor-pointer" style="${currentPlat===id?`background:${GRAD};color:white`:''}"><img src="${ICONS[id]}" class="w-6 h-6 mx-auto bg-white rounded-md p-1 shadow-sm"><p class="text-[10px] font-bold capitalize mt-1">${id}</p></div>`).join('')+
     `<div onclick="setPlat('otros')" class="card p-2.5 text-center cursor-pointer" style="${currentPlat==='otros'?`background:${GRAD};color:white`:''}">
-      <div class="text-xl">📁</div><p class="text-[11px] font-bold">Otros</p>
+      <div class="text-base">📁</div><p class="text-[10px] font-bold mt-1">Otros</p>
     </div>`;
 }
 function setPlat(id){currentPlat=id;renderPlats();filtrar();}
@@ -183,23 +191,23 @@ function render(l){
     return `<div class="card p-4 flex flex-col justify-between">
       <div>
         <div class="flex gap-3 mb-2.5">
-          ${ic ? `<img loading="lazy" src="${ic}" class="w-11 h-11 bg-white rounded-xl p-1.5 object-contain">` : ''}
+          ${ic ? `<img loading="lazy" src="${ic}" class="w-10 h-10 bg-white rounded-xl p-2 object-contain shadow-sm">` : ''}
           <div class="flex-1">
-            <h3 class="font-bold text-xs md:text-sm">${esc(s.name)}</h3>
+            <h3 class="font-bold text-xs text-pink-50 leading-tight">${esc(s.name)}</h3>
             <div class="flex gap-1.5 mt-2">
-              <span class="badge bg-green-500/15 text-green-300">🟢 Activo</span>
-              <span class="badge bg-white/5 text-gray-300">${pgs}</span>
+              <span class="badge bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">✨ Disponible</span>
+              <span class="badge bg-rose-500/10 text-rose-300 border border-rose-500/20">${pgs}</span>
             </div>
           </div>
         </div>
-        <p class="text-[11px] text-gray-400 mb-4 bg-black/20 p-2 rounded-xl">Mín: ${s.min} • Máx: ${Number(s.max).toLocaleString()}</p>
+        <p class="text-[11px] text-gray-400 mb-3 bg-black/30 p-2 rounded-xl border border-white/5">Mín: ${s.min} • Máx: ${Number(s.max).toLocaleString()}</p>
       </div>
-      <div class="flex justify-between items-center pt-2 border-t border-white/5">
-        <span class="text-[11px] text-gray-400">Automático</span>
-        <button onclick="openBuy('${s.service}')" class="px-5 py-2 rounded-xl text-xs font-bold text-white" style="background:${GRAD}">Comprar</button>
+      <div class="flex justify-between items-center pt-2.5 border-t border-rose-500/10">
+        <span class="text-[10px] text-gray-400 font-medium">Procesamiento automático</span>
+        <button onclick="openBuy('${s.service}')" class="px-4 py-2 rounded-xl text-xs font-bold text-white shadow-md shadow-rose-500/20 transition hover:scale-105" style="background:${GRAD}">Comprar 🌸</button>
       </div>
     </div>`;
-  }).join('') || '<p class="text-center py-12 text-gray-500 col-span-2">Sin servicios</p>';
+  }).join('') || '<p class="text-center py-10 text-gray-500 col-span-2 text-xs">No se encontraron servicios disponibles</p>';
 }
 let deb;document.getElementById('search').addEventListener('input',()=>{clearTimeout(deb);deb=setTimeout(filtrar,300);});
 function filtrar(){
@@ -219,15 +227,15 @@ function filtrar(){
   render(list);
 }
 function openBuy(id){
-  if(!currentUsername){openProfile();showToast('Inicia sesión para comprar','error');return;}
+  if(!currentUsername){openProfile();showToast('Inicia sesión para realizar tu pedido','error');return;}
   currentServ=servicios.find(x=>String(x.service)===String(id));
   if(!currentServ)return;
 
   document.getElementById('mTitle').textContent=currentServ.name;
-  document.getElementById('mMeta').innerHTML=`Min ${currentServ.min} - Max ${Number(currentServ.max).toLocaleString()}`;
+  document.getElementById('mMeta').innerHTML=`Mínimo: ${currentServ.min} • Máximo: ${Number(currentServ.max).toLocaleString()}`;
   document.getElementById('mQty').value='';
   document.getElementById('mLink').value='';
-  document.getElementById('mPrice').textContent='Ingresá cantidad';
+  document.getElementById('mPrice').textContent='Ingresá cantidad válida';
 
   const inputType = currentServ.input_type || 'link';
   const lblInput = document.getElementById('lblInput');
@@ -237,13 +245,13 @@ function openBuy(id){
     lblInput.textContent = '✉️ Correo Electrónico';
     inputLink.placeholder = 'ejemplo@correo.com';
   } else if(inputType === 'username'){
-    lblInput.textContent = '👤 Nombre de Usuario';
+    lblInput.textContent = '👤 Nombre de Usuario (@usuario)';
     inputLink.placeholder = '@usuario';
   } else if(inputType === 'custom'){
-    lblInput.textContent = '📝 ID / Texto Requerido';
+    lblInput.textContent = '📝 ID o Texto Requerido';
     inputLink.placeholder = 'Escribe los datos necesarios...';
   } else {
-    lblInput.textContent = '🔗 Enlace / Link URL';
+    lblInput.textContent = '🔗 Enlace o URL de Perfil/Publicación';
     inputLink.placeholder = 'https://...';
   }
 
@@ -253,7 +261,7 @@ function closeModal(){document.getElementById('buyModal').classList.add('hidden'
 document.getElementById('mQty').addEventListener('input',()=>{
   if(!currentServ)return;
   const q=Number(document.getElementById('mQty').value||0);
-  if(!q){document.getElementById('mPrice').textContent='Ingresá cantidad';return;}
+  if(!q){document.getElementById('mPrice').textContent='Ingresá cantidad válida';return;}
 
   let total = 0;
   if (currentServ.price_type === 'per_unit') {
@@ -262,7 +270,7 @@ document.getElementById('mQty').addEventListener('input',()=>{
     total = Math.round((Number(currentServ.price_gs) / 1000) * q);
   }
 
-  document.getElementById('mPrice').textContent='Total: ₲'+total.toLocaleString();
+  document.getElementById('mPrice').textContent='Total a pagar: ₲'+total.toLocaleString();
 });
 async function confirmBuy(){
   const link=document.getElementById('mLink').value.trim();
@@ -280,17 +288,17 @@ async function confirmBuy(){
     const r=await fetch(API+'/order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({service:currentServ.service,link,quantity:qty,username:currentUsername})});
     const d=await r.json();
     if(!r.ok)throw new Error(d.error||'Error');
-    showToast('¡Pedido creado con éxito!');
+    showToast('¡Pedido creado con éxito! 🌸');
     let my=[];try{my=JSON.parse(localStorage.getItem('my_orders')||'[]');}catch(e){}
     my.unshift({id:d.order?.id||Date.now(),service:currentServ.name,link,quantity:qty,total:d.order?.total_gs||0,date:new Date().toLocaleDateString()});
     localStorage.setItem('my_orders',JSON.stringify(my.slice(0,50)));
     loadMe();
     setTimeout(()=>{closeModal();showTab('pedidos');},800);
   }catch(e){showToast(e.message,'error');}
-  btn.disabled=false;btn.textContent='Confirmar';
+  btn.disabled=false;btn.textContent='Confirmar Pedido';
 }
 async function loadMe(){if(!currentUsername)return;try{const me=await fetch(API+'/me',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:currentUsername})}).then(r=>r.json());const b='₲'+Number(me.balance||0).toLocaleString();document.getElementById('userBal').textContent=b;document.getElementById('myBalance').textContent=b;}catch(e){}}
-function renderOrders(){let my=[];try{my=JSON.parse(localStorage.getItem('my_orders')||'[]');}catch(e){}document.getElementById('ordersList').innerHTML=my.map(x=>`<div class="card p-4"><b class="text-sm">#${x.id} ${esc(x.service)}</b><p class="text-xs text-gray-400 truncate">📥 ${esc(x.link)}</p><p class="text-xs mt-1">₲${Number(x.total||0).toLocaleString()} • ${x.quantity} • ${x.date||''}</p></div>`).join('')||'<div class="card p-8 text-center text-gray-500">Sin pedidos</div>';document.getElementById('myOrdersCount').textContent=my.length;}
+function renderOrders(){let my=[];try{my=JSON.parse(localStorage.getItem('my_orders')||'[]');}catch(e){}document.getElementById('ordersList').innerHTML=my.map(x=>`<div class="card p-3.5"><b class="text-xs text-pink-100">#${x.id} • ${esc(x.service)}</b><p class="text-[11px] text-gray-400 truncate mt-1">📥 ${esc(x.link)}</p><p class="text-xs text-rose-300 mt-1.5 font-medium">₲${Number(x.total||0).toLocaleString()} • Cantidad: ${x.quantity} • ${x.date||''}</p></div>`).join('')||'<div class="card p-6 text-center text-gray-500 text-xs">Aún no registras pedidos</div>';document.getElementById('myOrdersCount').textContent=my.length;}
 init();
 </script>
 </body>
