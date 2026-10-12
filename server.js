@@ -1,4 +1,4 @@
-// server.js - JAVI SMM Pro v3.3 FULL SUPABASE - OPTIMIZADO CON INPUT_TYPE, MIN Y MAX
+// server.js - JAVI SMM Pro v3.4 FULL SUPABASE - CON SOPORTE PRICE_TYPE
 const express = require('express');
 const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
@@ -61,7 +61,7 @@ async function saveDB() {
   }
 }
 
-app.get('/api/health', (req, res) => res.json({ ok: true, version: 'v3.3-supabase-optimizado' }));
+app.get('/api/health', (req, res) => res.json({ ok: true, version: 'v3.4-supabase-price-type' }));
 app.get('/api/public-settings', (req, res) => res.json({ whatsapp: db.settings.whatsapp, announce: db.settings.announce || '' }));
 app.get('/api/settings', authMaster, (req, res) => res.json(db.settings));
 app.post('/api/settings', authMaster, (req, res) => {
@@ -111,12 +111,12 @@ app.post('/api/toggle-service', authMaster, (req, res) => {
   res.json({ ok: true });
 });
 
-// Endpoint edit-service actualizado con input_type, min y max
+// Endpoint edit-service actualizado con input_type, price_type, min y max
 app.post('/api/edit-service', authMaster, (req, res) => {
   const s = db.services.find(x => String(x.service) === String(req.body.service));
   if (!s) return res.status(404).json({ error: 'No encontrado' });
 
-  const { name, price_gs, category, min, max, is_visible, input_type } = req.body;
+  const { name, price_gs, category, min, max, is_visible, input_type, price_type } = req.body;
 
   if (name !== undefined) s.name = name;
   if (price_gs !== undefined) s.price_gs = Number(price_gs);
@@ -125,6 +125,7 @@ app.post('/api/edit-service', authMaster, (req, res) => {
   if (max !== undefined) s.max = Number(max);
   if (is_visible !== undefined) s.is_visible = Boolean(is_visible);
   if (input_type !== undefined) s.input_type = input_type;
+  if (price_type !== undefined) s.price_type = price_type;
 
   saveDB();
   res.json({ ok: true, service: s });
@@ -162,7 +163,6 @@ app.post('/api/sync-services', authMaster, async (req, res) => {
         const idx = db.services.findIndex(x => String(x.service) === String(s.service) && x.provider === providerName);
         if (idx >= 0) {
           db.services[idx].rate = cost;
-          // Si el admin editó manualmente min/max, se respeta; sino toma los del proveedor
           db.services[idx].min = db.services[idx].min || s.min;
           db.services[idx].max = db.services[idx].max || s.max;
           db.services[idx].type = s.type;
@@ -179,7 +179,8 @@ app.post('/api/sync-services', authMaster, async (req, res) => {
             min: s.min || 1,
             max: s.max || 10000,
             type: s.type,
-            input_type: 'link', // Valor por defecto
+            input_type: 'link',
+            price_type: 'per_1k', // Por defecto por cada 1000
             provider: providerName,
             is_visible: true
           });
@@ -269,12 +270,22 @@ async function handleOrder(req, res) {
   const s = db.services.find(x => String(x.service) === String(service));
   if (!s) return res.json({ error: 'Servicio no encontrado' });
   const qty = Number(quantity);
-  const price = Math.ceil((s.price_gs / 1000) * qty);
+
+  // Cálculo de precio según el modo configurado en el Admin
+  let price = 0;
+  if (s.price_type === 'per_unit') {
+    price = Math.ceil(Number(s.price_gs) * qty);
+  } else {
+    price = Math.ceil((Number(s.price_gs) / 1000) * qty);
+  }
+
   let u = db.users.find(x => x.username === String(username || '').toLowerCase());
   if (!u) return res.json({ error: 'Usuario no encontrado' });
   if ((u.balance || 0) < price) return res.json({ error: 'Saldo insuficiente' });
+  
   u.balance -= price;
   const order = { id: Date.now(), username: u.username, service: s.name, link, quantity: qty, total_gs: price, status: 'pending', date: new Date().toISOString(), provider: s.provider, provider_service: s.service };
+  
   try {
     const p = db.providers.find(x => x.name === s.provider && x.active);
     if (p) {
@@ -282,10 +293,12 @@ async function handleOrder(req, res) {
       await fetch(p.api_url, { method: 'POST', body: form, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
     }
   } catch (e) {}
-  db.orders.unshift(order); saveDB();
+
+  db.orders.unshift(order); 
+  saveDB();
   res.json({ ok: true, order_id: order.id, order: { id: order.id, total_gs: price }, new_balance: u.balance });
 }
 app.post('/api/order', handleOrder);
 app.post('/api/create-order', handleOrder);
 
-loadDB().then(() => { app.listen(PORT, () => console.log('JAVI v3.3 Pro activo en ' + PORT)); });
+loadDB().then(() => { app.listen(PORT, () => console.log('JAVI v3.4 Pro activo en ' + PORT)); });

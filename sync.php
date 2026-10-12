@@ -65,15 +65,18 @@ try {
     // Marcar servicios locales como inactivos temporalmente (Soft Delete)
     $pdo->query("UPDATE servicios SET is_available = 0");
 
-    // Preparar inserción incluyendo input_type ('link' por defecto al insertar)
+    // Preparar inserción incluyendo input_type y price_type ('per_1k' por defecto al insertar)
+    // Se utiliza IFNULL para conservar configuraciones personalizadas hechas en el Admin.
     $stmt = $pdo->prepare("
-        INSERT INTO servicios (service_id, name, category, rate, min, max, input_type, is_available) 
-        VALUES (:service_id, :name, :category, :rate, :min, :max, 'link', 1)
+        INSERT INTO servicios (service_id, name, category, rate, min, max, input_type, price_type, is_available) 
+        VALUES (:service_id, :name, :category, :rate, :min, :max, 'link', 'per_1k', 1)
         ON DUPLICATE KEY UPDATE 
             category = VALUES(category),
             rate = VALUES(rate),
             min = IFNULL(min, VALUES(min)),
             max = IFNULL(max, VALUES(max)),
+            input_type = IFNULL(input_type, 'link'),
+            price_type = IFNULL(price_type, 'per_1k'),
             is_available = 1
     ");
 

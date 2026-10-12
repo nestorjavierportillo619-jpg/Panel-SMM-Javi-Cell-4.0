@@ -174,7 +174,33 @@ function renderPlats(){
     </div>`;
 }
 function setPlat(id){currentPlat=id;renderPlats();filtrar();}
-function render(l){document.getElementById('list').innerHTML=l.map(s=>{const pgs=s.price_gs?'₲'+Number(s.price_gs).toLocaleString()+'/1k':'';const ic=getIcon(s);return `<div class="card p-4 flex flex-col justify-between"><div><div class="flex gap-3 mb-2.5">${ic?`<img loading="lazy" src="${ic}" class="w-11 h-11 bg-white rounded-xl p-1.5 object-contain">`:''}<div class="flex-1"><h3 class="font-bold text-xs md:text-sm">${esc(s.name)}</h3><div class="flex gap-1.5 mt-2"><span class="badge bg-green-500/15 text-green-300">🟢 Activo</span><span class="badge bg-white/5 text-gray-300">${pgs}</span></div></div></div><p class="text-[11px] text-gray-400 mb-4 bg-black/20 p-2 rounded-xl">Mín: ${s.min} • Máx: ${Number(s.max).toLocaleString()}</p></div><div class="flex justify-between items-center pt-2 border-t border-white/5"><span class="text-[11px] text-gray-400">Automático</span><button onclick="openBuy('${s.service}')" class="px-5 py-2 rounded-xl text-xs font-bold text-white" style="background:${GRAD}">Comprar</button></div></div>`;}).join('')||'<p class="text-center py-12 text-gray-500 col-span-2">Sin servicios</p>';}
+function render(l){
+  document.getElementById('list').innerHTML=l.map(s=>{
+    const priceType = s.price_type || 'per_1k';
+    const pgs = s.price_gs ? '₲' + Number(s.price_gs).toLocaleString() + (priceType === 'per_unit' ? ' /unidad' : ' /1k') : '';
+    const ic = getIcon(s);
+
+    return `<div class="card p-4 flex flex-col justify-between">
+      <div>
+        <div class="flex gap-3 mb-2.5">
+          ${ic ? `<img loading="lazy" src="${ic}" class="w-11 h-11 bg-white rounded-xl p-1.5 object-contain">` : ''}
+          <div class="flex-1">
+            <h3 class="font-bold text-xs md:text-sm">${esc(s.name)}</h3>
+            <div class="flex gap-1.5 mt-2">
+              <span class="badge bg-green-500/15 text-green-300">🟢 Activo</span>
+              <span class="badge bg-white/5 text-gray-300">${pgs}</span>
+            </div>
+          </div>
+        </div>
+        <p class="text-[11px] text-gray-400 mb-4 bg-black/20 p-2 rounded-xl">Mín: ${s.min} • Máx: ${Number(s.max).toLocaleString()}</p>
+      </div>
+      <div class="flex justify-between items-center pt-2 border-t border-white/5">
+        <span class="text-[11px] text-gray-400">Automático</span>
+        <button onclick="openBuy('${s.service}')" class="px-5 py-2 rounded-xl text-xs font-bold text-white" style="background:${GRAD}">Comprar</button>
+      </div>
+    </div>`;
+  }).join('') || '<p class="text-center py-12 text-gray-500 col-span-2">Sin servicios</p>';
+}
 let deb;document.getElementById('search').addEventListener('input',()=>{clearTimeout(deb);deb=setTimeout(filtrar,300);});
 function filtrar(){
   const q=norm(document.getElementById('search').value);
@@ -224,7 +250,20 @@ function openBuy(id){
   document.getElementById('buyModal').classList.remove('hidden');
 }
 function closeModal(){document.getElementById('buyModal').classList.add('hidden');}
-document.getElementById('mQty').addEventListener('input',()=>{if(!currentServ)return;const q=Number(document.getElementById('mQty').value||0);if(!q){document.getElementById('mPrice').textContent='Ingresá cantidad';return;}const total=Math.round(Number(currentServ.price_gs)/1000*q);document.getElementById('mPrice').textContent='Total: ₲'+total.toLocaleString();});
+document.getElementById('mQty').addEventListener('input',()=>{
+  if(!currentServ)return;
+  const q=Number(document.getElementById('mQty').value||0);
+  if(!q){document.getElementById('mPrice').textContent='Ingresá cantidad';return;}
+
+  let total = 0;
+  if (currentServ.price_type === 'per_unit') {
+    total = Math.round(Number(currentServ.price_gs) * q);
+  } else {
+    total = Math.round((Number(currentServ.price_gs) / 1000) * q);
+  }
+
+  document.getElementById('mPrice').textContent='Total: ₲'+total.toLocaleString();
+});
 async function confirmBuy(){
   const link=document.getElementById('mLink').value.trim();
   const qty=Number(document.getElementById('mQty').value);
