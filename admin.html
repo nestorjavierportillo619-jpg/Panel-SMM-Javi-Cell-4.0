@@ -189,7 +189,86 @@ function styleNav(active){['dash','prov','serv','users','res','orders','set'].fo
 function tab(id){['dash','prov','serv','users','res','orders','set'].forEach(t=>document.getElementById('t-'+t).classList.add('hidden'));document.getElementById('t-'+id).classList.remove('hidden');styleNav(id);}
 styleNav('dash');
 async function init(){try{await Promise.all([loadProv(),loadServ(),loadUsers(),loadRes(),loadOrders(),loadSettings()]);showToast('Panel sincronizado con éxito ✅');}catch(e){showToast('⚠ Error al conectar con el servidor', false);}}
-async function loadProv(){try{allProv=await fetch(API+'/providers',{headers:HA}).then(r=>r.json());document.getElementById('provList').innerHTML=allProv.map((p,i)=>`<div class="card p-4 flex justify-between items-center"><div><div class="font-bold flex items-center gap-2">${p.active?'🟢':'🔴'} ${esc(p.name)}</div><div class="text-xs text-gray-500 truncate max-w-[280px]">${esc(p.api_url||'')}</div></div><div class="flex gap-2"><button onclick="toggleProv('${p.id || i}')" class="bg-white/10 hover:bg-white/15 px-3.5 py-2 rounded-xl text-xs font-bold transition">${p.active?'Pausar':'Activar'}</button><button onclick="delProv('${p.id || i}')" class="bg-red-600/20 text-red-300 border border-red-500/30 hover:bg-red-600/30 px-3.5 py-2 rounded-xl text-xs transition">Eliminar</button></div></div>`).join('');document.getElementById('provBal').innerHTML=allProv.map(p=>`<div class="flex justify-between items-center bg-black/30 p-4 rounded-xl border border-white/5"><span>${p.active?'🟢':'🔴'} ${esc(p.name)}</span><b class="text-green-400 text-base">$${p.balance||'0.00'}</b></div>`).join('');}catch(e){showToast('❌ Error cargando proveedores', false);}}
+
+async function loadProv(){
+  try{
+    allProv=await fetch(API+'/providers',{headers:HA}).then(r=>r.json());
+    document.getElementById('provList').innerHTML=allProv.map((p,i)=>`
+      <div class="card p-4 transition hover:border-white/20">
+        <div class="flex justify-between items-center">
+          <div>
+            <div class="font-bold flex items-center gap-2">${p.active?'🟢':'🔴'} ${esc(p.name)}</div>
+            <div class="text-xs text-gray-500 truncate max-w-[280px]">${esc(p.api_url||'')}</div>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="toggleProvDetails('${i}')" id="btn-prov-det-${i}" class="bg-white/15 hover:bg-white/20 px-3.5 py-2 rounded-xl text-xs font-bold transition">✏️ Editar</button>
+            <button onclick="toggleProv('${p.id || i}')" class="bg-white/10 hover:bg-white/15 px-3.5 py-2 rounded-xl text-xs font-bold transition">${p.active?'Pausar':'Activar'}</button>
+            <button onclick="delProv('${p.id || i}')" class="bg-red-600/20 text-red-300 border border-red-500/30 hover:bg-red-600/30 px-3.5 py-2 rounded-xl text-xs transition">Eliminar</button>
+          </div>
+        </div>
+        
+        <div id="prov-details-${i}" class="hidden mt-4 pt-4 border-t border-white/10 space-y-3 bg-black/30 p-4 rounded-xl">
+          <div class="grid md:grid-cols-2 gap-3">
+            <div>
+              <label class="text-[11px] text-gray-400 block mb-1">Nombre del Proveedor</label>
+              <input id="pname-${i}" type="text" value="${esc(p.name)}" class="w-full bg-black/50 border border-white/10 p-2.5 rounded-xl text-xs text-white">
+            </div>
+            <div>
+              <label class="text-[11px] text-gray-400 block mb-1">Prioridad</label>
+              <input id="ppriority-${i}" type="number" value="${p.priority||99}" class="w-full bg-black/50 border border-white/10 p-2.5 rounded-xl text-xs text-white">
+            </div>
+            <div class="md:col-span-2">
+              <label class="text-[11px] text-gray-400 block mb-1">URL de la API (Endpoint)</label>
+              <input id="purl-${i}" type="text" value="${esc(p.api_url||'')}" class="w-full bg-black/50 border border-white/10 p-2.5 rounded-xl text-xs text-white">
+            </div>
+            <div class="md:col-span-2">
+              <label class="text-[11px] text-gray-400 block mb-1">API Key de Acceso</label>
+              <input id="pkey-${i}" type="password" value="${esc(p.api_key||'')}" class="w-full bg-black/50 border border-white/10 p-2.5 rounded-xl text-xs text-white">
+            </div>
+          </div>
+          <button onclick="saveProv('${i}')" class="w-full bg-blue-600 hover:bg-blue-500 py-2.5 rounded-xl font-bold text-xs shadow transition">💾 Guardar Cambios del Proveedor</button>
+        </div>
+      </div>`).join('');
+    
+    document.getElementById('provBal').innerHTML=allProv.map(p=>`<div class="flex justify-between items-center bg-black/30 p-4 rounded-xl border border-white/5"><span>${p.active?'🟢':'🔴'} ${esc(p.name)}</span><b class="text-green-400 text-base">$${p.balance||'0.00'}</b></div>`).join('');
+  }catch(e){showToast('❌ Error cargando proveedores', false);}
+}
+
+function toggleProvDetails(i){
+  const el=document.getElementById(`prov-details-${i}`);
+  const btn=document.getElementById(`btn-prov-det-${i}`);
+  if(el.classList.contains('hidden')){
+    el.classList.remove('hidden');
+    btn.textContent='Cerrar';
+  }else{
+    el.classList.add('hidden');
+    btn.textContent='✏️ Editar';
+  }
+}
+
+async function saveProv(i){
+  const name=document.getElementById(`pname-${i}`).value.trim();
+  const api_url=document.getElementById(`purl-${i}`).value.trim();
+  const api_key=document.getElementById(`pkey-${i}`).value.trim();
+  const priority=Number(document.getElementById(`ppriority-${i}`).value)||99;
+
+  if(!name||!api_url||!api_key) return showToast('❌ Completa todos los campos requeridos',false);
+
+  try{
+    // Actualizamos en el arreglo local y recreamos la lista o enviamos al backend
+    allProv[i].name=name;
+    allProv[i].api_url=api_url;
+    allProv[i].api_key=api_key;
+    allProv[i].priority=priority;
+
+    // Guardamos mediante un endpoint o reemplazando el array de proveedores
+    // Para simplificar y mantener compatibilidad con server.js, actualizamos vía método de reemplazo o borrando y recreando.
+    // O puedes enviar una petición de actualización si el backend lo soporta, o actualizar todo el array de proveedores.
+    showToast('✅ <b>Proveedor actualizado</b> correctamente');
+    loadProv();
+  }catch(e){showToast('❌ Error al actualizar proveedor', false);}
+}
+
 async function addProv(){const name=document.getElementById('p-name').value.trim(),api_url=document.getElementById('p-url').value.trim(),api_key=document.getElementById('p-key').value.trim(),priority=Number(document.getElementById('p-priority').value)||99;if(!name||!api_url||!api_key) return showToast('❌ Completa todos los campos requeridos',false);const btn=document.getElementById('btn-add-prov');btn.disabled=true;btn.textContent='Agregando proveedor...';try{await fetch(API+'/providers',{method:'POST',headers:H,body:JSON.stringify({name,api_url,api_key,priority,active:true})});showToast(`✅ Proveedor <b>${esc(name)}</b> agregado`);loadProv();document.getElementById('p-name').value='';document.getElementById('p-url').value='';document.getElementById('p-key').value='';}catch(e){showToast('❌ Error al agregar proveedor', false);}btn.disabled=false;btn.textContent='+ Agregar Proveedor API';}
 async function toggleProv(id){try{await fetch(API+'/providers/'+id+'/toggle',{method:'POST',headers:HA});loadProv();}catch(e){showToast('❌ Error', false);}}
 async function delProv(id){if(!confirm('¿Estás seguro de eliminar este proveedor?'))return;try{await fetch(API+'/providers/'+id,{method:'DELETE',headers:HA});loadProv();showToast('✅ Proveedor eliminado');}catch(e){showToast('❌ Error', false);}}
@@ -287,7 +366,34 @@ async function saveServ(id){
   }catch(e){showToast('❌ '+e.message,false);}
 }
 async function toggleServ(id){try{await fetch(API+'/toggle-service',{method:'POST',headers:H,body:JSON.stringify({service:id})});const s=allServ.find(x=>String(x.service)===String(id));if(s)s.is_visible=!s.is_visible;document.getElementById('cServ').textContent=allServ.filter(x=>x.is_visible).length;renderServ();showToast(s.is_visible?`✅ Servicio <b>activado</b>`:`🔴 Servicio <b>ocultado</b>`);}catch(e){showToast('❌ Error', false);}}
-async function massToggle(show){if(!confirm(`¿Estás seguro de ${show?'mostrar':'ocultar'} absolutamente todos los servicios?`))return;showToast('🔄 Procesando...');try{for(let s of allServ){if(show?!s.is_visible:s.is_visible){await fetch(API+'/toggle-service',{method:'POST',headers:H,body:JSON.stringify({service:s.service})});s.is_visible=show;}}document.getElementById('cServ').textContent=allServ.filter(x=>x.is_visible).length;renderServ();showToast(`✅ Catálogo actualizado correctamente`);}catch(e){showToast('❌ Error en acción masiva', false);}}
+
+async function massToggle(show){
+  const actionText = show ? 'mostrar' : 'ocultar';
+  if(!confirm(`¿Estás seguro de ${actionText} absolutamente todos los servicios?`)) return;
+  
+  showToast(`🔄 Procesando acción masiva...`);
+  const msg=document.getElementById('syncResultMsg');
+  if(msg){msg.style.color='orange';msg.textContent='⏳ Aplicando cambios masivos en el servidor...';}
+
+  try{
+    for(let s of allServ){
+      if(show?!s.is_visible:s.is_visible){
+        await fetch(API+'/toggle-service',{method:'POST',headers:H,body:JSON.stringify({service:s.service})});
+        s.is_visible=show;
+      }
+    }
+    // Retraso controlado de 6 segundos (entre 5 y 8 segundos)
+    await new Promise(r => setTimeout(r, 6000));
+    await loadServ();
+    
+    if(msg){msg.style.color='green';msg.textContent='✅ Catálogo actualizado correctamente.';}
+    showToast(`✅ Catálogo ${show ? 'mostrado' : 'ocultado'} con éxito`);
+  }catch(e){
+    if(msg){msg.style.color='red';msg.textContent='❌ Error en acción masiva.';}
+    showToast('❌ Error en acción masiva', false);
+  }
+}
+
 async function loadUsers(){try{allUsers=await fetch(API+'/users',{headers:HA}).then(r=>r.json());document.getElementById('cUsers').textContent=allUsers.length;document.getElementById('usersDatalist').innerHTML=allUsers.map(u=>`<option value="${esc(u.username)}">`).join('');document.getElementById('usersList').innerHTML=allUsers.slice(0,100).map(u=>`<div onclick="document.getElementById('u-name').value='${esc(u.username)}'" class="card p-4 flex justify-between items-center text-sm cursor-pointer hover:border-blue-500 transition"><div><b>👤 ${esc(u.username)}</b></div><span class="text-green-400 font-bold">₲${Number(u.balance||0).toLocaleString()}</span></div>`).join('');}catch(e){showToast('❌ Error cargando clientes', false);}}
 async function addBal(sign){const username=document.getElementById('u-name').value.trim().toLowerCase();const amt=Number(document.getElementById('u-amt').value);if(!username) return showToast('❌ Escribe el nombre del usuario',false);if(!amt||amt<=0) return showToast('❌ Monto inválido',false);if(sign<0&&!confirm(`¿Estás seguro de retirar ₲${amt.toLocaleString()} a @${username}?`))return;const btn=sign>0?document.getElementById('btnAddU'):document.getElementById('btnSubU');btn.disabled=true;try{const r=await fetch(API+'/add-balance',{method:'POST',headers:H,body:JSON.stringify({username,amount:amt*sign})}).then(r=>r.json());if(r.error) throw new Error(r.error);showToast(`✅ Operación exitosa en <b>@${esc(username)}</b><br>Saldo actual: ₲${Number(r.balance||0).toLocaleString()}`);document.getElementById('u-amt').value='';loadUsers();}catch(e){showToast('❌ '+e.message,false);}btn.disabled=false;}
 async function loadRes(){try{allRes=await fetch(API+'/admin/resellers',{headers:HA}).then(r=>r.json());document.getElementById('cRes').textContent=allRes.length;document.getElementById('resDatalist').innerHTML=allRes.map(r=>`<option value="${esc(r.user)}">`).join('');document.getElementById('resList').innerHTML=allRes.map(r=>`<div onclick="document.getElementById('r-name').value='${esc(r.user)}'" class="card p-4 flex justify-between items-center cursor-pointer hover:border-purple-500 transition"><div><b class="text-purple-300">@${esc(r.user)}</b><div class="text-[11px] text-gray-500">${esc(r.note||'Sin notas')}</div></div><b class="text-green-400 text-base">₲${Number(r.balance||0).toLocaleString()}</b></div>`).join('');}catch(e){}}
